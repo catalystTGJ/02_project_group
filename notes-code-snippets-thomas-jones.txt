@@ -1,0 +1,42 @@
+This is just a place for me to store some information that might be import or useful.
+
+
+
+
+
+style information that might be used:
+
+/* @keyframes clock_wise {
+    from {
+        transform: rotate(0deg);
+        transform-origin: 75%;
+        filter: hue-rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+        transform-origin: 75%;
+        filter: hue-rotate(360deg);
+    }
+}
+
+@keyframes count_wise {
+    from {
+        transform: rotate(360deg);
+        transform-origin: 48%;
+        filter: hue-rotate(0deg);
+    }
+    to {
+        transform: rotate(0deg);
+        transform-origin: 48%;
+        filter: hue-rotate(360deg);
+    }
+}
+
+@keyframes hue_trans {
+    from {
+        filter: hue-rotate(0deg);
+    }
+    to {
+        filter: hue-rotate(360deg);
+    }
+} */
