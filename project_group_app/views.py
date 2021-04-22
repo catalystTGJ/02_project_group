@@ -17,7 +17,7 @@ def signin(request):
         user = authenticate(username=request.POST['username'], password=request.POST['password'])
         if user is not None:
             login(request, user)
-            return redirect('/game_pick')
+            return redirect('/game-pick')
     return render(request, 'signin.html', context)
 
 # sign-off buttion will flush session
@@ -52,13 +52,15 @@ def game_rank(request):
 
 # chat/views.py
 
-def games_pick(request):
-    context = {
-        'games' : ['game1player1','game1player2','game1player3','game1player4']
-    }
-    return render(request, 'ZZ_games_player.html', context)
+# def game_player_pick(request):
+#     context = {'games' : ['game1player1','game1player2','game1player3','game1player4']}
+#     return render(request, 'ZZ_games_player.html', context)
 
-def games_chat(request, game_player):
-    return render(request, 'ZZ_games_chat.html', {
-        'game_player': game_player
-    })
+def game_chat(request):
+    context = {
+        'game_player1' : 'game1player1',
+        'game_player2' : 'game1player2',
+        'game_player3' : 'game1player3',
+        'game_player4' : 'game1player4',
+    }
+    return render(request, 'ZZ_games_chat.html', context)

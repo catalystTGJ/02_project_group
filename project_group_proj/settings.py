@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'channels'
 ]
 
-
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',

@@ -8,37 +8,82 @@
 <body>
 
     <h4>Game Metrics</h4>
-    <textarea id="game-metrics-log" cols="100" rows="20"></textarea><br>
+    <textarea id="game-metrics-log" cols="100" rows="2"></textarea><br>
     <hr>
 
     <h4>Game Common</h4>
-    <textarea id="game-common-log" cols="100" rows="20"></textarea><br>
+    <textarea id="game-common-log" cols="100" rows="2"></textarea><br>
     <hr>
 
-    <h4>Game Chat log</h4>
-    <textarea id="game-chat-log" cols="100" rows="20"></textarea><br>
+    <h4>Game Player 1 Chat log</h4>
+    <textarea id="game-player1-chat-log" cols="100" rows="2"></textarea><br>
+    <hr>
+
+    <h4>Game Player 2 Chat log</h4>
+    <textarea id="game-player2-chat-log" cols="100" rows="2"></textarea><br>
+    <hr>
+
+    <h4>Game Player 3 Chat log</h4>
+    <textarea id="game-player3-chat-log" cols="100" rows="2"></textarea><br>
+    <hr>
+
+    <h4>Game Player 4 Chat log</h4>
+    <textarea id="game-player4-chat-log" cols="100" rows="2"></textarea><br>
     <hr>
 
     <h4>Enter message</h4>
     <input id="game-chat-message-input" type="text" size="100"><br>
     <input id="game-chat-message-submit" type="button" value="Send">
 
-    {{ game1player1|json_script:"game1player1" }}
+    <p id="game-player1" hidden>{{game_player1}}</p>
+    <p id="game-player2" hidden>{{game_player2}}</p>
+    <p id="game-player3" hidden>{{game_player3}}</p>
+    <p id="game-player4" hidden>{{game_player4}}</p>
+
     <script>
-        const game1commonSocket = new WebSocket(
+
+        const gameplayer1 = document.getElementById('game-player1').textContent;
+        const gameplayer2 = document.getElementById('game-player2').textContent;
+        const gameplayer3 = document.getElementById('game-player3').textContent;
+        const gameplayer4 = document.getElementById('game-player4').textContent;
+
+        const gameplayer1Socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gp/'
+            + gameplayer1
+            + '/'
+        );
+
+        const gameplayer2Socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gp/'
+            + gameplayer2
+            + '/'
+        );
+
+        const gameplayer3Socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gp/'
+            + gameplayer3
+            + '/'
+        );
+
+        const gameplayer4Socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gp/'
+            + gameplayer4
+            + '/'
+        );
+
+        const gamecommonSocket = new WebSocket(
             'ws://'
             + window.location.host
             + '/ws/gc/'
             + 'game1common'
-            + '/'
-        );
-
-        const game1player = JSON.parse(document.getElementById('game1player1').textContent);
-        const game1playerSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/gp/'
-            + game1player1
             + '/'
         );
 
@@ -50,31 +95,57 @@
             + '/'
         );
 
-
-        game1playerSocket.onmessage = function(e) {
+        gameplayer1Socket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#game-chat-log').value += (data.message + '\n');
+            document.querySelector('#game-player1-chat-log').value = (data.message + '\n');
         };
 
-        game1playerSocket.onclose = function(e) {
-            console.error('game chat socket closed unexpectedly');
+        gameplayer1Socket.onclose = function(e) {
+            console.error('game player 1 chat socket closed unexpectedly');
+        };
+
+        gameplayer2Socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#game-player2-chat-log').value = (data.message + '\n');
+        };
+
+        gameplayer2Socket.onclose = function(e) {
+            console.error('game player 2 chat socket closed unexpectedly');
+        };
+
+        gameplayer3Socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#game-player3-chat-log').value = (data.message + '\n');
+        };
+
+        gameplayer3Socket.onclose = function(e) {
+            console.error('game player 3 chat socket closed unexpectedly');
+        };
+
+        gameplayer4Socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#game-player4-chat-log').value = (data.message + '\n');
+        };
+
+        gameplayer4Socket.onclose = function(e) {
+            console.error('game player 4 chat socket closed unexpectedly');
         };
 
         gamemetricsSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#game-metrics-log').value += (data.message + '\n');
+            document.querySelector('#game-metrics-log').value = (data.message + '\n');
         };
 
         gamemetricsSocket.onclose = function(e) {
             console.error('game metrics socket closed unexpectedly');
         };
 
-        game1commonSocket.onmessage = function(e) {
+        gamecommonSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#game-common-log').value += (data.message + '\n');
+            document.querySelector('#game-common-log').value = (data.message + '\n');
         };
 
-        game1commonSocket.onclose = function(e) {
+        gamecommonSocket.onclose = function(e) {
             console.error('game metrics socket closed unexpectedly');
         };
 
@@ -94,13 +165,54 @@
             messageInputDom.value = '';
         };
 
-        function GameMetricsRequest () {
-            gamemetricsSocket.send(JSON.stringify({
-                'request' : 'Something'
+        function GameCommonRequest () {
+            gamecommonSocket.send(JSON.stringify({
+                'request' : 'Working!'
             }));
         }
 
-        window.setInterval(GameMetricsRequest,10000);
+        function GameMetricsRequest () {
+            gamemetricsSocket.send(JSON.stringify({
+                'request' : 'Working!'
+            }));
+        }
+
+        function gameplayer1Request (value) {
+            gameplayer1Socket.send(JSON.stringify({
+                'request' : value
+            }));
+        }
+
+        function gameplayer2Request (value) {
+            gameplayer2Socket.send(JSON.stringify({
+                'request' : value
+            }));
+        }
+
+        function gameplayer3Request (value) {
+            gameplayer3Socket.send(JSON.stringify({
+                'request' : value
+            }));
+        }
+
+        function gameplayer4Request (value) {
+            gameplayer4Socket.send(JSON.stringify({
+                'request' : value
+            }));
+        }
+
+        function idlework() {
+            for (var loop=1001; loop<=1030; loop++) {
+                var text = 'This sentence is roughly 50 characters..... : '
+                gameplayer1Request(text + loop)
+                gameplayer2Request(text + loop)
+                gameplayer3Request(text + loop)
+                gameplayer4Request(text + loop)
+            }
+
+        }
+
+        window.setInterval(idlework,1000);
 
     </script>
 </body>

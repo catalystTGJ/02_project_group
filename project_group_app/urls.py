@@ -9,7 +9,7 @@ urlpatterns = [
     path('game-dash', views.game_dash),
     path('game-play', views.game_play),
     path('game-rank', views.game_rank),
-
-    path('games-pick', views.games_pick),
-    path('games-chat/<str:game_player>/', views.games_chat)
+    path('game-chat', views.game_chat)
+    # path('game-player-pick', views.game_player_pick),
+    # path('game-chat/<str:game_player>/', views.game_chat)
 ]
