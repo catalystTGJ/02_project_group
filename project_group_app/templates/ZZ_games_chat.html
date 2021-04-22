@@ -1,0 +1,107 @@
+<!-- chat/templates/chat/room.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>game chat</title>
+</head>
+<body>
+
+    <h4>Game Metrics</h4>
+    <textarea id="game-metrics-log" cols="100" rows="20"></textarea><br>
+    <hr>
+
+    <h4>Game Common</h4>
+    <textarea id="game-common-log" cols="100" rows="20"></textarea><br>
+    <hr>
+
+    <h4>Game Chat log</h4>
+    <textarea id="game-chat-log" cols="100" rows="20"></textarea><br>
+    <hr>
+
+    <h4>Enter message</h4>
+    <input id="game-chat-message-input" type="text" size="100"><br>
+    <input id="game-chat-message-submit" type="button" value="Send">
+
+    {{ game1player1|json_script:"game1player1" }}
+    <script>
+        const game1commonSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gc/'
+            + 'game1common'
+            + '/'
+        );
+
+        const game1player = JSON.parse(document.getElementById('game1player1').textContent);
+        const game1playerSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gp/'
+            + game1player1
+            + '/'
+        );
+
+        const gamemetricsSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/gm/'
+            + 'game_metrics'
+            + '/'
+        );
+
+
+        game1playerSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#game-chat-log').value += (data.message + '\n');
+        };
+
+        game1playerSocket.onclose = function(e) {
+            console.error('game chat socket closed unexpectedly');
+        };
+
+        gamemetricsSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#game-metrics-log').value += (data.message + '\n');
+        };
+
+        gamemetricsSocket.onclose = function(e) {
+            console.error('game metrics socket closed unexpectedly');
+        };
+
+        game1commonSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#game-common-log').value += (data.message + '\n');
+        };
+
+        game1commonSocket.onclose = function(e) {
+            console.error('game metrics socket closed unexpectedly');
+        };
+
+        document.querySelector('#game-chat-message-input').focus();
+        document.querySelector('#game-chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#game-chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#game-chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#game-chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+
+        function GameMetricsRequest () {
+            gamemetricsSocket.send(JSON.stringify({
+                'request' : 'Something'
+            }));
+        }
+
+        window.setInterval(GameMetricsRequest,10000);
+
+    </script>
+</body>
+</html>

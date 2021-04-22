@@ -9,7 +9,7 @@ var wh = window.innerHeight;
 //delay between updates
 var msdelay = 15;
 // scale of the tanks/objects
-var scale = .25;
+var scale = 1;
 // maximum rotation amount for chassis and turret
 var max_rot = 3;
 

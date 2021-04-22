@@ -6,39 +6,59 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 
-# from .models import SampleTable1, SampleTable2, SampleTable3
-
-# Index
+# index will send to sign-in registration
 def index(request):
     return redirect('/signin')
 
-# Create
-def create(request):
-    return HttpResponse('Things are working!')
-
-# Read
+# sign-in registration will send to game selection
 def signin(request):
     context = {}
     if request.method == 'POST':
         user = authenticate(username=request.POST['username'], password=request.POST['password'])
         if user is not None:
             login(request, user)
-            return redirect('/tanks')
+            return redirect('/game_pick')
     return render(request, 'signin.html', context)
 
-# Read
-@login_required(login_url='/signin')
-def tanks(request):
-    return render(request, "tanks.html")
-
+# sign-off buttion will flush session
+# it might be desirable to write some stuff for the user into the db, but i'm not sure we need this.
 def signoff(request):
     request.session.flush()
     return redirect('/')
 
-# Update
-def update(request):
-    return HttpResponse('Things are working!')
+# game selection will lead to game play
+# notice there is a 'require login' decorator here to send back to sign-in registration.
+@login_required(login_url='/signin')
+def game_pick(request):
+    return render(request, "game_pick.html")
 
-# Delete
-def delete(request):
-    return HttpResponse('Things are working!')
+# game_play will be where the game actually happens.
+# notice there is a 'require login' decorator here to send back to sign-in registration.
+@login_required(login_url='/signin')
+def game_play(request):
+    return render(request, "game_play.html")
+
+# game selection will lead to game play
+# notice there is a 'require login' decorator here to send back to sign-in registration.
+@login_required(login_url='/signin')
+def game_dash(request):
+    return render(request, "game_dash.html")
+
+# game rank will show the player metrics
+# notice there is a 'require login' decorator here to send back to sign-in registration.
+@login_required(login_url='/signin')
+def game_rank(request):
+    return render(request, "game_rank.html")
+
+# chat/views.py
+
+def games_pick(request):
+    context = {
+        'games' : ['game1player1','game1player2','game1player3','game1player4']
+    }
+    return render(request, 'ZZ_games_player.html', context)
+
+def games_chat(request, game_player):
+    return render(request, 'ZZ_games_chat.html', {
+        'game_player': game_player
+    })
