@@ -11,6 +11,13 @@
         <script src="{% static 'js/game.js' %}"></script> 
     </head>
     <body id="body">
+        <p id="live-player" hidden>{{live_player}}</p>
+        <p id="game-commmon" hidden>{{game_common}}</p>
+        <p id="game-player1" hidden>{{game_player1}}</p>
+        <p id="game-player2" hidden>{{game_player2}}</p>
+        <p id="game-player3" hidden>{{game_player3}}</p>
+        <p id="game-player4" hidden>{{game_player4}}</p>
+
         <div id='battlefield_container' class="background" width="1600" height="800">
             <div id="obstacle_overlay">
                 <p value="placeholder for obstacles. javascript will insert in the DOM."></p>

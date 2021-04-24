@@ -1,8 +1,11 @@
 var html_ready = false;
 
-var bullet_image = 'static/images/bullets/bullet_1.png'
-var turret_image = 'static/images/tanks/tank_01_turret_1.png'
-var chassis_image = 'static/images/tanks/tank_01_chassis_1.png'
+var bullet_image = '/static/images/bullets/bullet_1.png'
+var turret_image = '/static/images/tanks/tank_01_turret_1.png'
+var chassis_image = '/static/images/tanks/tank_01_chassis_1.png'
+
+var turret_image_prefix = '/static/images/tanks/tank_01_turret_'
+var chassis_image_prefix = '/static/images/tanks/tank_01_chassis_'
 
 //determine window size - this is not currently in use
 var ww = window.innerWidth;
@@ -53,7 +56,6 @@ var tank = {
 //runrise is a dictionary of x,y cooridinate values for run/rise
 
 var tank1 = {
-    t : tank,
     n : 'tank1',
     x: 0,
     y: 0,
@@ -69,7 +71,6 @@ var tank1 = {
 }
 
 var tank2 = {
-    t : tank,
     n : 'tank2',
     x: 1800,
     y: 0,
@@ -85,7 +86,6 @@ var tank2 = {
 }
 
 var tank3 = {
-    t : tank,
     n : 'tank3',
     x: 0,
     y: 1800,
@@ -101,7 +101,6 @@ var tank3 = {
 }
 
 var tank4 = {
-    t : tank,
     n : 'tank4',
     x: 1800,
     y: 1800,
@@ -115,6 +114,139 @@ var tank4 = {
     d_chassis: 0,
     runrise: {'x' : 0, 'y' : 0}
 }
+
+function gameplayer1connect() {
+    const gameplayer1 = document.getElementById('game-player1').textContent;
+    const gameplayer1Socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/gp/' + gameplayer1 + '/'
+    );
+
+    gameplayer1Socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#game-player1-chat-log').value = (data.message + '\n');
+    };
+
+    gameplayer1Socket.onclose = function(e) {
+        console.error('game player 1 chat socket closed unexpectedly');
+    };
+}
+
+function gameplayer2connect() {
+    const gameplayer2 = document.getElementById('game-player2').textContent;
+    const gameplayer2Socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/gp/' + gameplayer2 + '/'
+    );
+
+    gameplayer2Socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#game-player1-chat-log').value = (data.message + '\n');
+    };
+
+    gameplayer2Socket.onclose = function(e) {
+        console.error('game player 2 chat socket closed unexpectedly');
+    };
+}
+
+function gameplayer3connect() {
+    const gameplayer3 = document.getElementById('game-player3').textContent;
+    const gameplayer3Socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/gp/' + gameplayer3 + '/'
+    );
+
+    gameplayer3Socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#game-player1-chat-log').value = (data.message + '\n');
+    };
+
+    gameplayer3Socket.onclose = function(e) {
+        console.error('game player 3 chat socket closed unexpectedly');
+    };
+}
+
+function gameplayer4connect() {
+    const gameplayer4 = document.getElementById('game-player4').textContent;
+    const gameplayer4Socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/gp/' + gameplayer4 + '/'
+    );
+
+    gameplayer4Socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#game-player1-chat-log').value = (data.message + '\n');
+    };
+
+    gameplayer4Socket.onclose = function(e) {
+        console.error('game player 4 chat socket closed unexpectedly');
+    };
+}
+
+function gamecommonconnect() {
+    const gameplayer4 = document.getElementById('game-common').textContent;
+    const gamecommonSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/gc/' + 'game1common' + '/'
+    );
+}
+
+function gamemetricsconnect() {
+    const gamemetricsSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/gm/' + 'game_metrics' + '/'
+    );
+}
+
+// gameplayer1Socket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     document.querySelector('#game-player1-chat-log').value = (data.message + '\n');
+// };
+
+// gameplayer2Socket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     document.querySelector('#game-player2-chat-log').value = (data.message + '\n');
+// };
+
+// gameplayer3Socket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     document.querySelector('#game-player3-chat-log').value = (data.message + '\n');
+// };
+
+// gameplayer4Socket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     document.querySelector('#game-player4-chat-log').value = (data.message + '\n');
+// };
+
+
+// gamemetricsSocket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     document.querySelector('#game-metrics-log').value = (data.message + '\n');
+// };
+
+
+// gamecommonSocket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     document.querySelector('#game-common-log').value = (data.message + '\n');
+// };
+
+// gameplayer1Socket.onclose = function(e) {
+//     console.error('game player 1 chat socket closed unexpectedly');
+// };
+
+// gameplayer2Socket.onclose = function(e) {
+//     console.error('game player 2 chat socket closed unexpectedly');
+// };
+
+// gameplayer3Socket.onclose = function(e) {
+//     console.error('game player 3 chat socket closed unexpectedly');
+// };
+
+// gameplayer4Socket.onclose = function(e) {
+//     console.error('game player 4 chat socket closed unexpectedly');
+// };
+
+// gamemetricsSocket.onclose = function(e) {
+//     console.error('game metrics socket closed unexpectedly');
+// };
+
+// gamecommonSocket.onclose = function(e) {
+//     console.error('game metrics socket closed unexpectedly');
+// };
 
 function existsElement(element_id) {
     //Attempt to get the element using document.getElementById
@@ -237,7 +369,7 @@ function collisionCheck(x, y, xy_half, check, check_half, x_center, y_center) {
         collision+=.5;
     }
     //return 1 when enough collision conditions have been met.
-    if (collision == 1 && xy_half == 5) {console.log('happened: ' + collision)}
+    // if (collision == 1 && xy_half == 5) {console.log('happened: ' + collision)}
     return ((collision >= 1) ? 1 : 0);
 }
 
@@ -289,26 +421,32 @@ function updateTank(tank_dict) {
     if (tank_dict.y > bfh - 10) {tank_dict.y = bfh - 10};
     if (tank_dict.y < 60) {tank_dict.y = 60};
 
+    tank_image_index = 1 + Math.trunc(tank_dict.damage/100)
+
     //update chassis
-    document.getElementById(tank_dict.n + '_chassis').width = tank_dict.t.w_chassis;
-    document.getElementById(tank_dict.n + '_chassis').height = tank_dict.t.h_chassis;
-    document.getElementById(tank_dict.n + '_chassis').src = chassis_image;
+    document.getElementById(tank_dict.n + '_chassis').width = tank.w_chassis; //remove tank_dict.t
+    document.getElementById(tank_dict.n + '_chassis').height = tank.h_chassis; //remove tank_dict.t
+
+    document.getElementById(tank_dict.n + '_chassis').src = chassis_image_prefix + tank_image_index + '.png';
+
     document.getElementById(tank_dict.n + '_chassis_container').style.position = "absolute";
     document.getElementById(tank_dict.n + '_chassis_container').style.top = tank_dict.y + 'px';
-    document.getElementById(tank_dict.n + '_chassis_container').style.left = tank_dict.x + tank_dict.t.left_off + 'px';
+    document.getElementById(tank_dict.n + '_chassis_container').style.left = tank_dict.x + tank.left_off + 'px'; //removed tank_dict.t
     document.getElementById(tank_dict.n + '_chassis_container').style.transform = 'rotate(' + tank_dict.t_chassis + 'deg)';
-    document.getElementById(tank_dict.n + '_chassis_container').style.transformOrigin = tank_dict.t.to_chassis + "%";
+    document.getElementById(tank_dict.n + '_chassis_container').style.transformOrigin = tank.to_chassis + "%"; //removed tank_dict.t
     document.getElementById(tank_dict.n + '_chassis_container').style.filter = 'hue-rotate(' + tank_dict.color + 'deg) invert(' + tank_dict.damage / 5000 + ')';
 
     //update turret
-    document.getElementById(tank_dict.n + '_turret').width = tank_dict.t.w_turret;
-    document.getElementById(tank_dict.n + '_turret').height = tank_dict.t.h_turret;
-    document.getElementById(tank_dict.n + '_turret').src = turret_image;
+    document.getElementById(tank_dict.n + '_turret').width = tank.w_turret; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '_turret').height = tank.h_turret; //removed tank_dict.t
+
+    document.getElementById(tank_dict.n + '_turret').src = turret_image_prefix + tank_image_index + '.png';
+
     document.getElementById(tank_dict.n + '_turret_container').style.position = "absolute";
-    document.getElementById(tank_dict.n + '_turret_container').style.top = tank_dict.y + tank_dict.t.top_off + 'px';
+    document.getElementById(tank_dict.n + '_turret_container').style.top = tank_dict.y + tank.top_off + 'px'; //removed tank_dict.t
     document.getElementById(tank_dict.n + '_turret_container').style.left = tank_dict.x + 'px';
     document.getElementById(tank_dict.n + '_turret_container').style.transform = 'rotate(' + tank_dict.t_turret + 'deg)';
-    document.getElementById(tank_dict.n + '_turret_container').style.transformOrigin = tank_dict.t.to_turret + "%";
+    document.getElementById(tank_dict.n + '_turret_container').style.transformOrigin = tank.to_turret + "%"; //removed tank_dict.t
     document.getElementById(tank_dict.n + '_turret_container').style.filter = 'hue-rotate(' + (tank_dict.color + tank_dict.h) + 'deg)';
 
     //update tank data overlay
@@ -327,6 +465,34 @@ function updateTank(tank_dict) {
 
 }
 
+function livetankSend() {
+    if (live_number == "1") {
+        gameplayer1send(live_tank)
+    } else if (live_number == "2") {
+        gameplayer2send(live_tank)
+    } else if (live_number == "3") {
+        gameplayer3send(live_tank)
+    } else if (live_number == "4") {
+        gameplayer4send(live_tank)
+    }
+}
+
+function gameplayer1send(data) {
+    gameplayer1Socket.send(JSON.stringify(data));
+}
+
+function gameplayer2send(data) {
+    gameplayer1Socket.send(JSON.stringify(data));
+}
+
+function gameplayer3send(data) {
+    gameplayer1Socket.send(JSON.stringify(data));
+}
+
+function gameplayer4send(data) {
+    gameplayer1Socket.send(JSON.stringify(data));
+}
+
 function gameLoop(){
     if (html_ready) {
         checkCreateTanks();
@@ -334,6 +500,8 @@ function gameLoop(){
         updateTank(tank2);
         updateTank(tank3);
         updateTank(tank4);
+
+        // livetankSend();
 
         //work the ballistic list
         old_list = ball_list;
@@ -351,25 +519,25 @@ function gameLoop(){
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank1, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    console.log('tank 1 here: ' + old_list[i].c)
+                    // console.log('tank 1 here: ' + old_list[i].c)
                     tank1.damage+=50;
                     old_list[i].c = 0;
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank2, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    console.log('tank 2 here: ' + old_list[i].c)
+                    // console.log('tank 2 here: ' + old_list[i].c)
                     tank2.damage+=50;
                     old_list[i].c = 0;
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank3, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    console.log('tank 3 here: ' + old_list[i].c)
+                    // console.log('tank 3 here: ' + old_list[i].c)
                     tank3.damage+=50;
                     old_list[i].c = 0;
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank4, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    console.log('tank 4 here: ' + old_list[i].c)
+                    // console.log('tank 4 here: ' + old_list[i].c)
                     tank4.damage+=50;
                     old_list[i].c = 0;
                 }
@@ -394,85 +562,108 @@ function gameLoop(){
 
 document.onkeydown = function(e){
     if (html_ready) {
-        //z key
-        if(e.keyCode == 90){
-            if (tank1.h < 500) {
+        if (live_tank != {}) {
+            //z key
+            if(e.keyCode == 90){
+                if (live_tank.h < 500) {
 
-                var new_ball = {
-                    n : 'ball_' + (ball_list.length),
-                    c : 180,
-                    s : 20,
-                    t : tank1.t_turret,
-                    to : tank1.t.to_chassis,
+                    var new_ball = {
+                        n : 'ball', // _' + (ball_list.length),
+                        c : 180,
+                        s : 20,
+                        t : live_tank.t_turret,
+                        to : tank.to_chassis, ///removed live_tank.t
+                    }
+
+                    new_ball.runrise = degreestoRunRise(new_ball.t)
+                    adjust = ((Math.abs(new_ball.runrise.x) + Math.abs(new_ball.runrise.y) > 1.7) ? .72 : 1);
+                    // console.log(new_ball.runrise.x + ' : ' + new_ball.runrise.y);
+                    new_ball.x = (live_tank.x + tank.x_center) + (new_ball.runrise.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
+                    new_ball.y = (live_tank.y + tank.y_center) + (new_ball.runrise.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
+
+                    ball_list.push(new_ball);
+                    live_tank.h+=750;
+
                 }
-
-                new_ball.runrise = degreestoRunRise(new_ball.t)
-                adjust = ((Math.abs(new_ball.runrise.x) + Math.abs(new_ball.runrise.y) > 1.7) ? .72 : 1);
-                console.log(new_ball.runrise.x + ' : ' + new_ball.runrise.y);
-                new_ball.x = (tank1.x + tank.x_center) + (new_ball.runrise.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
-                new_ball.y = (tank1.y + tank.y_center) + (new_ball.runrise.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
-
-                ball_list.push(new_ball);
-                tank1.h+=750;
 
             }
 
-        }
-
-        //option key on Mac (might need to change this for windows users)
-        if(e.keyCode == 18){
-            if (!event.getModifierState("Shift")) {
-                tank1.d_chassis = 0;
-                tank1.r_chassis = 0;
-            } else {
-                tank1.r_turret = 0;
-            }
-        }
-
-        //left key
-        if(e.keyCode == 37){
-            if (!event.getModifierState("Shift")) {
-                if (tank1.r_chassis > -max_rot) {
-                    tank1.r_chassis-=.25;
-                    //tank1.d_chassis = 0;
-                };
-            } else {
-                if (tank1.r_turret > -max_rot) {
-                    tank1.r_turret-=.25;
-                };
-            };
-        }
-        //right key
-        if(e.keyCode == 39){
-            if (!event.getModifierState("Shift")) {
-                if (tank1.r_chassis < max_rot) {
-                    tank1.r_chassis+=.25;
-                    //tank1.d_chassis = 0;
+            //option key on Mac (might need to change this for windows users)
+            if(e.keyCode == 18){
+                if (!event.getModifierState("Shift")) {
+                    live_tank.d_chassis = 0;
+                    live_tank.r_chassis = 0;
+                } else {
+                    live_tank.r_turret = 0;
                 }
-            } else {
-                if (tank1.r_turret < max_rot) {
-                    tank1.r_turret+=.25;
+            }
+
+            //left key
+            if(e.keyCode == 37){
+                if (!event.getModifierState("Shift")) {
+                    if (live_tank.r_chassis > -max_rot) {
+                        live_tank.r_chassis-=.25;
+                        //tank1.d_chassis = 0;
+                    };
+                } else {
+                    if (live_tank.r_turret > -max_rot) {
+                        live_tank.r_turret-=.25;
+                    };
                 };
-            };    
-        }
-        //down key
-        if(e.keyCode == 40){
-            if (tank1.d_chassis > -max_rot) {
-                tank1.d_chassis-=.25;
-                //tank1.r_chassis = 0;
-            };
-        }
-        // up key
-        if(e.keyCode == 38){
-            if (tank1.d_chassis < max_rot) {
-                tank1.d_chassis+=.25;
-                //tank1.r_chassis = 0;
-            };
+            }
+            //right key
+            if(e.keyCode == 39){
+                if (!event.getModifierState("Shift")) {
+                    if (live_tank.r_chassis < max_rot) {
+                        live_tank.r_chassis+=.25;
+                        //tank1.d_chassis = 0;
+                    }
+                } else {
+                    if (live_tank.r_turret < max_rot) {
+                        live_tank.r_turret+=.25;
+                    };
+                };    
+            }
+            //down key
+            if(e.keyCode == 40){
+                if (live_tank.d_chassis > -max_rot) {
+                    live_tank.d_chassis-=.25;
+                    //tank1.r_chassis = 0;
+                };
+            }
+            // up key
+            if(e.keyCode == 38){
+                if (live_tank.d_chassis < max_rot) {
+                    live_tank.d_chassis+=.25;
+                    //tank1.r_chassis = 0;
+                };
+            }
         }
     }
 }
 
 window.addEventListener("load", function() {
+    gameplayer1connect()
+    gameplayer2connect()
+    gameplayer3connect()
+    gameplayer4connect()
+    // gamecommonconnect()
+    const live_player = document.getElementById('live-player').textContent;
+    const live_number = live_player.charAt(live_player.length - 1);
+    if (live_number == "1") {
+        live_tank = tank1
+    } else if (live_number == "2") {
+        live_tank = tank2
+    } else if (live_number == "3") {
+        live_tank = tank3
+    } else if (live_number == "4") {
+        live_tank = tank4
+    } else {
+        live_tank = {}
+    }
+    
+    // console.log(live_tank.n)
+
     html_ready = true;
 });
 
