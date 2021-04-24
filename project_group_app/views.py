@@ -35,8 +35,16 @@ def game_pick(request):
 # game_play will be where the game actually happens.
 # notice there is a 'require login' decorator here to send back to sign-in registration.
 @login_required(login_url='/signin')
-def game_play(request):
-    return render(request, "game_play.html")
+def game_play(request, player="game1player1"):
+    context = {
+        'live_player' : player,
+        'game_common' : 'game1common',
+        'game_player1' : 'game1player1',
+        'game_player2' : 'game1player2',
+        'game_player3' : 'game1player3',
+        'game_player4' : 'game1player4',
+    }
+    return render(request, "game_play.html", context)
 
 # game selection will lead to game play
 # notice there is a 'require login' decorator here to send back to sign-in registration.
