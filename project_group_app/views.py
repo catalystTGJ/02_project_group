@@ -39,6 +39,7 @@ def game_play(request, player="game1player1"):
     context = {
         'live_player' : player,
         'game_common' : 'game1common',
+        'game_metrics' : 'gamemetrics',
         'game_player1' : 'game1player1',
         'game_player2' : 'game1player2',
         'game_player3' : 'game1player3',

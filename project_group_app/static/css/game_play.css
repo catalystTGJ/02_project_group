@@ -1,0 +1,77 @@
+body {
+    background-color: silver;
+}
+form {
+    margin: 0 10px;
+}
+
+hr.solid {
+    border-top: 2px ridge darkslategray;
+    box-shadow: 0 2px 4px 0 gray;
+}
+
+.table-fixed tbody {
+    height: 600px;
+    overflow: auto;
+    border: solid 2px darkslategray;
+    box-shadow: 0 4px 8px 0 gray;
+}
+
+.table-fixed thead,
+.table-fixed tbody,
+.table-fixed tr,
+.table-fixed td,
+.table-fixed th {
+    display: block;
+}
+
+.table-fixed tbody td,
+.table-fixed tbody th,
+.table-fixed thead > tr > th {
+    float: left;
+    position: relative;
+
+    &::after {
+        content: '';
+        clear: both;
+        display: block;
+    }
+
+}
+
+.fa {
+    font-size: 25px;
+}
+
+.checked {
+    color: orange;
+}
+
+.inline {
+    display: inline;
+}
+
+.background {
+    position : absolute;
+    width : 1800px;
+    height : 1000px;
+    background-color: grey;
+}
+
+.tankdata {
+    position : absolute;
+    width : 1800px;
+    height : 100px;
+    top : 0px;
+    left : 0px;
+    line-height: 50%;
+}
+
+.metrics {
+    position : absolute;
+    width : 1800px;
+    height : 1000px;
+    top : 1001px;
+    left : 0px;
+    background-color: grey;
+}
