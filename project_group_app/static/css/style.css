@@ -66,3 +66,10 @@ hr.solid {
     left : 0;
     line-height: 50%;
 }
+
+/* Game-Dash */
+
+.btn-group{
+    text-align: right;
+    margin: 5px 8px 50px;
+}
