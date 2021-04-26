@@ -53,14 +53,14 @@ hr.solid {
 
 .background {
     position : absolute;
-    width : 1800px;
-    height : 1000px;
+    width : 1400px;
+    height : 700px;
     background-color: grey;
 }
 
 .tankdata {
     position : absolute;
-    width : 1800px;
+    width : 1400px;
     height : 100px;
     top : 0px;
     left : 0px;
@@ -69,9 +69,9 @@ hr.solid {
 
 .metrics {
     position : absolute;
-    width : 1800px;
-    height : 1000px;
-    top : 1001px;
+    width : 1400px;
+    height : 260px;
+    top : 701px;
     left : 0px;
     background-color: grey;
 }

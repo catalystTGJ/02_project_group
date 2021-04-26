@@ -375,62 +375,49 @@ function BallSender(ball) {
     gamecommonsend(ball);
 }
 
-// function BallSender(ball) {
-//     if (live_number == "1") {
-//         gameplayer1send(ball)
-//     } else if (live_number == "2") {
-//         gameplayer2send(ball)
-//     } else if (live_number == "3") {
-//         gameplayer3send(ball)
-//     } else if (live_number == "4") {
-//         gameplayer4send(ball)
-//     }
-// }
-
 function tankRender() {
+    var update_others = true;
+    if (Math.trunc(game_cycle/10) == game_cycle/10) {
+        var send = true;
+    } else {
+        var send = false;
+    }
+    if (live_number == "1") {
+        live_tank.c++;
+        updateTank(tank1, true);
+        if (send) {gameplayer1send(live_tank)}
+    } else {
+        if (tank1.c < tank1a.c) {tank1 = Object.assign(tank1, tank1a)}
+        updateTank(tank1, update_others)
+    }
     
-        var update_others = true;
-        if (Math.trunc(game_cycle/10) == game_cycle/10) {
-            var send = true;
-        } else {
-            var send = false;
-        }
-        if (live_number == "1") {
-            live_tank.c++;
-            updateTank(tank1, true);
-            if (send) {gameplayer1send(live_tank)}
-        } else {
-            if (tank1.c < tank1a.c) {tank1 = Object.assign(tank1, tank1a)}
-            updateTank(tank1, update_others)
-        }
-        
-        if (live_number == "2") {
-            live_tank.c++;
-            updateTank(tank2, true);
-            if (send) {gameplayer2send(live_tank)}
-        } else {
-            if (tank2.c < tank2a.c) {tank2 = Object.assign(tank2, tank2a)}
-            updateTank(tank2, update_others)
-        }
-        
-        if (live_number == "3") {
-            live_tank.c++;
-            updateTank(tank3, true);
-            if (send) {gameplayer3send(live_tank)}
-        } else {
-            if (tank3.c < tank3a.c) {tank1 = Object.assign(tank3, tank3a)}
-            updateTank(tank3, update_others)
-        }
-        
-        if (live_number == "4") {
-            live_tank.c++;
-            updateTank(tank4, true);
-            if (send) {gameplayer4send(live_tank)}
-        } else {
-            if (tank4.c < tank4a.c) {tank4 = Object.assign(tank4, tank4a)}
-            updateTank(tank4, update_others)
-        }
-        live_tank.e = false;
+    if (live_number == "2") {
+        live_tank.c++;
+        updateTank(tank2, true);
+        if (send) {gameplayer2send(live_tank)}
+    } else {
+        if (tank2.c < tank2a.c) {tank2 = Object.assign(tank2, tank2a)}
+        updateTank(tank2, update_others)
+    }
+    
+    if (live_number == "3") {
+        live_tank.c++;
+        updateTank(tank3, true);
+        if (send) {gameplayer3send(live_tank)}
+    } else {
+        if (tank3.c < tank3a.c) {tank1 = Object.assign(tank3, tank3a)}
+        updateTank(tank3, update_others)
+    }
+    
+    if (live_number == "4") {
+        live_tank.c++;
+        updateTank(tank4, true);
+        if (send) {gameplayer4send(live_tank)}
+    } else {
+        if (tank4.c < tank4a.c) {tank4 = Object.assign(tank4, tank4a)}
+        updateTank(tank4, update_others)
+    }
+    live_tank.e = false;
 }
 
 function gameLoop(){
@@ -500,8 +487,9 @@ function gameLoop(){
 document.onkeydown = function(e){
     if (html_ready) {
         if (live_tank != {}) {
-            //z key
-            if(e.keyCode == 90){
+
+            // turret fire
+            if(e.keyCode == 71){
                 if (live_tank.h < 1000) {
                     ball_index++;
                     var new_ball = {
@@ -526,58 +514,68 @@ document.onkeydown = function(e){
                 }
             }
 
-            //option key on Mac (might need to change this for windows users)
-            if(e.keyCode == 18){
-                if (!event.getModifierState("Shift")) {
-                    live_tank.s = 0;
-                    live_tank.r_c = 0;
-                } else {
-                    live_tank.r_t = 0;
+            // drive/chassis rotation stop
+            if(e.key == 'a' || e.key == 'A'){
+                live_tank.s = 0;
+                live_tank.r_c = 0;
+                live_tank.e = true;
+            }
+
+            //turret rotation stop
+            if(e.key == 'h' || e.key == 'H'){
+                live_tank.r_t = 0;
+                live_tank.e = true;
+            }
+
+            //rotate chassis left
+            if(e.key == 'd' || e.key == 'D'){
+                if (live_tank.r_c > -max_rot){
+                    live_tank.r_c-=.25;
+                    //tank1.s = 0;
+                live_tank.e = true;
+                }
+            }
+
+            //rotate turret left
+            if(e.key == 'f' || e.key == 'F'){
+                if (live_tank.r_t > -max_rot){
+                    live_tank.r_t-=.25;
                 }
                 live_tank.e = true;
             }
 
-            //left key
-            if(e.keyCode == 37){
-                if (!event.getModifierState("Shift")) {
-                    if (live_tank.r_c > -max_rot) {
-                        live_tank.r_c-=.25;
-                        //tank1.s = 0;
-                    };
-                } else {
-                    if (live_tank.r_t > -max_rot) {
-                        live_tank.r_t-=.25;
-                    };
-                };
+            //rotate chassis right
+            if(e.key == 'k' || e.key == 'K'){
+                if (live_tank.r_c < max_rot){
+                    live_tank.r_c+=.25;
+                    //tank1.s = 0;
+                }
                 live_tank.e = true;
             }
-            //right key
-            if(e.keyCode == 39){
-                if (!event.getModifierState("Shift")) {
-                    if (live_tank.r_c < max_rot) {
-                        live_tank.r_c+=.25;
-                        //tank1.s = 0;
-                    }
-                } else {
-                    if (live_tank.r_t < max_rot) {
-                        live_tank.r_t+=.25;
-                    };
-                };
+
+            //rotate turret right
+            if(e.key == 'j' || e.key == 'J'){
+                if (live_tank.r_t < max_rot){
+                    live_tank.r_t+=.25;
+                }
                 live_tank.e = true;
             }
-            //down key
-            if(e.keyCode == 40){
-                if (live_tank.s > -max_rot) {
+
+            //drive reverse
+            if(e.key == 'l' || e.key == 'L'){
+                if (live_tank.s > -max_rot){
                     live_tank.s-=.25;
                     //tank1.r_c = 0;
-                };
+                }
+                live_tank.e = true;
             }
-            // up key
-            if(e.keyCode == 38){
-                if (live_tank.s < max_rot) {
+
+            // drive forward
+            if(e.key == 's' || e.key == 'S'){
+                if (live_tank.s < max_rot){
                     live_tank.s+=.25;
                     //tank1.r_c = 0;
-                };
+                }
                 live_tank.e = true;
             }
         }

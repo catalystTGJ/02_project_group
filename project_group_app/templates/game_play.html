@@ -19,7 +19,7 @@
         <p id="game-player3" hidden>{{game_player3}}</p>
         <p id="game-player4" hidden>{{game_player4}}</p>
 
-        <div id='battlefield_container' class="background" width="1600" height="800">
+        <div id='battlefield_container' class="background" width="1250" height="600">
             <div id="obstacle_overlay">
                 <p value="placeholder for obstacles. javascript will insert in the DOM."></p>
             </div>
@@ -56,16 +56,29 @@
                 </div>
             </div>
         </div>
-        <div class="form-group text-right">
-            <a class="btn btn-secondary btn-sm" href="/signoff">sign off</a>
-        </div>
-        <div class="container metrics">
-            <textarea id="game-player1-chat-log" cols="30" rows="5">sample</textarea>
-            <textarea id="game-player2-chat-log" cols="30" rows="5">sample</textarea>
-            <textarea id="game-player3-chat-log" cols="30" rows="5">sample</textarea>
-            <textarea id="game-player4-chat-log" cols="30" rows="5">sample</textarea>
-            <textarea id="game-common-log" cols="30" rows="5">sample</textarea>
-            <textarea id="game-metrics-log" cols="30" rows="5">sample</textarea>
+        <div class="container-fluid metrics">
+            <div class="row center">
+                <div class="col-12 text-center mt-1">
+                    <div class="btn-group mr-2" role="group" aria-label="game_dash_group">
+                        <button type="button" class="btn-sm btn-secondary">Select</button>
+                        <button type="button" class="btn-sm btn-secondary">Dashboard</button>
+                        <button type="button" class="btn-sm btn-secondary">Refresh</button>
+                        <button type="button" class="btn-sm btn-secondary">Sign Out</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row center">
+                <div class="col-12 text-center"><p>Controls are: Turret - left:[F] Right:[J] Fire:[G] Stop: [H] --- Steering: left:[D] right: [K] --- Drive - forward; [S] backward: [L] --- Drive-Steer Stop: [A] --- Controls Toggle: [Semicolon]</p></div>
+            </div>
+            <div class="row center">
+                <div class="col-2 text-center"><textarea id="game-player1-chat-log" cols="20" rows="2">sample</textarea></div>
+                <div class="col-2 text-center"><textarea id="game-player2-chat-log" cols="20" rows="2">sample</textarea></div>
+                <div class="col-2 text-center"><textarea id="game-player3-chat-log" cols="20" rows="2">sample</textarea></div>
+                <div class="col-2 text-center"><textarea id="game-player4-chat-log" cols="20" rows="2">sample</textarea></div>
+                <div class="col-2 text-center"><textarea id="game-common-log" cols="20" rows="2">sample</textarea></div>
+                <div class="col-2 text-center"><textarea id="game-metrics-log" cols="20" rows="2">sample</textarea></div>
+            </div>
         </div>
     </body>
 </html>

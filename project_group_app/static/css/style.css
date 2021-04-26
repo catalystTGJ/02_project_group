@@ -51,22 +51,6 @@ hr.solid {
     display: inline;
 }
 
-.background {
-    position : absolute;
-    width : 1800px;
-    height : 1000px;
-    background-color: grey;
-}
-
-.tankdata {
-    position : absolute;
-    width : 1800px;
-    height : 100px;
-    top : 0;
-    left : 0;
-    line-height: 50%;
-}
-
 /* Game-Dash */
 
 .btn-group{
