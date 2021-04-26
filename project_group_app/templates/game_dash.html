@@ -15,51 +15,43 @@
 <body>
     <div class="btn-group mr-2" role="group" aria-label="game_dash_group">
         <button type="button" class="btn btn-secondary">Select</button>
-        <button type="button" class="btn btn-secondary">Dashboard</button>
+        <button type="button" class="btn btn-secondary">Metrics</button>
         <button type="button" class="btn btn-secondary">Sign Out</button>
     </div>
-    <div>
-        <button type="button" class="btn btn-secondary">Confirm</button>
-    </div>
-
-    <table class="table table-striped table-dark">
-        <thead>
+    <table class="table">
+        <thead class="thead-dark">
             <tr>
-                <th scope="col">Game number</th>
-                <th scope="col">Choose</th>
-                <th scope="col">Your</th>
-                <th scope="col">Player</th>
-                <th scope="col">Number</th>
+                <th scope="col">Game</th>
+                <th scope="col">Player 1 {{ gameActive.gameUser_id }}</th>
+                <th scope="col">Player 2</th>
+                <th scope="col">Player 3</th>
+                <th scope="col">Player 4</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <th scope="row">1</th>
-                <td><button type="button" class="btn btn-outline-success">Player 1</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 2</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 3</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 4</button></td>
+                <th scope="row">1 {{gameActive.gameName }}</th>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
             </tr>
             <tr>
-                <th scope="row">2</th>
-                <td><button type="button" class="btn btn-outline-success">Player 1</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 2</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 3</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 4</button></td>
+                <th scope="row">2 {{gameActive.gameName }}</th>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
             </tr>
             <tr>
-                <th scope="row">3</th>
-                <td><button type="button" class="btn btn-outline-success">Player 1</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 2</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 3</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 4</button></td>
+                <th scope="row">3 {{gameActive.gameName }}</th>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
             </tr>
             <tr>
-                <th scope="row">4</th>
-                <td><button type="button" class="btn btn-outline-success">Player 1</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 2</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 3</button></td>
-                <td><button type="button" class="btn btn-outline-success">Player 4</button></td>
+                <th scope="row">4 {{gameActive.gameName }}</th>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
             </tr>
         </tbody>
     </table>
