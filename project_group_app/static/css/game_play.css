@@ -60,11 +60,17 @@ hr.solid {
 
 .tankdata {
     position : absolute;
-    width : 1400px;
+    width : 1600px;
     height : 100px;
     top : 0px;
     left : 0px;
     line-height: 50%;
+}
+
+.tankprogbar {
+    width : 100px;
+    margin-left : 3px;
+    vertical-align : text-bottom;
 }
 
 .metrics {

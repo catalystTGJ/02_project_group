@@ -18,41 +18,48 @@
         <p id="game-player2" hidden>{{game_player2}}</p>
         <p id="game-player3" hidden>{{game_player3}}</p>
         <p id="game-player4" hidden>{{game_player4}}</p>
+        <p id="game-player1-name" hidden>{{game_player1_name}}</p>
+        <p id="game-player2-name" hidden>{{game_player2_name}}</p>
+        <p id="game-player3-name" hidden>{{game_player3_name}}</p>
+        <p id="game-player4-name" hidden>{{game_player4_name}}</p>
 
-        <div id='battlefield_container' class="background" width="1250" height="600">
-            <div id="obstacle_overlay">
-                <p value="placeholder for obstacles. javascript will insert in the DOM."></p>
+        <div id='battlefield-container' class="background" width="1250" height="600">
+            <div id="object-overlay">
+                <p value="placeholder for objects. javascript will insert in the DOM."></p>
             </div>
-            <div id="tank_overlay">
+            <div id="tank-overlay">
                 <p value="placeholder for tanks. javascript will insert in the DOM."></p>
             </div>
-            <div id="ballistic_overlay">
+            <div id="ballistic-overlay">
                 <p value="placeholder for shots. javascript will insert in the DOM."></p>
             </div>
-            <div id='tank_data_overlay' class="tankdata">
-                <div id="tank1_data">
-                    <p id="tank1_data_1"></p>
-                    <p id="tank1_data_2"></p>
-                    <p id="tank1_data_3"></p>
-                    <p id="tank1_data_4"></p>
+            <div id="tree-overlay">
+                <p value="placeholder for trees. javascript will insert in the DOM."></p>
+            </div>
+            <div id='tank-data-overlay' class="tankdata">
+                <div id="tank1-data">
+                    <p id="tank1-player-name"></p>
+                    <label>H:</label><progress id="tank1-heat-bar" class="tankprogbar" value="0" max="1000"></progress>
+                    <br>
+                    <label>D:</label><progress id="tank1-damage-bar" class="tankprogbar" value="0" max="10000"></progress>
                 </div>
-                <div id="tank2_data">
-                    <p id="tank2_data_1"></p>
-                    <p id="tank2_data_2"></p>
-                    <p id="tank2_data_3"></p>
-                    <p id="tank2_data_4"></p>
+                <div id="tank2-data">
+                    <p id="tank2-player-name"></p>
+                    <label>H:</label><progress id="tank2-heat-bar" class="tankprogbar" value="0" max="1000"></progress>
+                    <br>
+                    <label>D:</label><progress id="tank2-damage-bar" class="tankprogbar" value="0" max="10000"></progress>
                 </div>
-                <div id="tank3_data">
-                    <p id="tank3_data_1"></p>
-                    <p id="tank3_data_2"></p>
-                    <p id="tank3_data_3"></p>
-                    <p id="tank3_data_4"></p>
+                <div id="tank3-data">
+                    <p id="tank3-player-name"></p>
+                    <label>H:</label><progress id="tank3-heat-bar" class="tankprogbar" value="0" max="1000"></progress>
+                    <br>
+                    <label>D:</label><progress id="tank3-damage-bar" class="tankprogbar" value="0" max="10000"></progress>
                 </div>
-                <div id="tank4_data">
-                    <p id="tank4_data_1"></p>
-                    <p id="tank4_data_2"></p>
-                    <p id="tank4_data_3"></p>
-                    <p id="tank4_data_4"></p>
+                <div id="tank4-data">
+                    <p id="tank4-player-name"></p>
+                    <label>H:</label><progress id="tank4-heat-bar" class="tankprogbar" value="0" max="1000"></progress>
+                    <br>
+                    <label>D:</label><progress id="tank4-damage-bar" class="tankprogbar" value="0" max="10000"></progress>
                 </div>
             </div>
         </div>

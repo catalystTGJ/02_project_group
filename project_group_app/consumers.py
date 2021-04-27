@@ -1,4 +1,7 @@
+from .models import GameAsset
 import json
+import random
+
 #from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -66,6 +69,7 @@ class GameCommonConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         n = text_data_json['n']
+            
         if n.startswith('chat') or n.startswith('ball') or n.startswith('tank'):
             await self.channel_layer.group_send(
                 self.group_name, {'type': 'message', 'message': text_data})

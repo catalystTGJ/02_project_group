@@ -5,6 +5,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from .models import GameActive, GameAsset, GameField, populateAssets, populateGameActive, populateGameField
+import random
+import json
 
 # index will send to sign-in registration
 def index(request):
@@ -73,3 +76,38 @@ def game_chat(request):
         'game_player4' : 'game1player4',
     }
     return render(request, 'ZZ_games_chat.html', context)
+
+def utility(request):
+    #populateAssets()
+    populateGameActive()
+    return redirect ("/game-dash")
+
+def game_field_generate(request, game_number):
+    populateGameField(game_number)
+    return redirect (f'/game-play/game1player2')
+    # return redirect (f'/game-field-request/{game_number}')
+
+
+def game_field_request(request, game_number):
+
+    game = GameActive.objects.filter(game_name=f'Game {game_number}')
+    field_objects = GameField.objects.filter(gameactive=game[0])
+    list = []
+    for o in range(len(field_objects)):
+        object_dict = {
+            'k' : field_objects[o].gameasset.type,
+            'f' : field_objects[o].gameasset.filename,
+            'w' : field_objects[o].gameasset.width,
+            'h' : field_objects[o].gameasset.height,
+            'r' : field_objects[o].gameasset.resistance,
+            'm' : field_objects[o].gameasset.max_damage,
+            'p' : field_objects[o].gameasset.damage_pot,
+            'n' : field_objects[o].html_name,
+            'd' : 0,
+            'x' : field_objects[o].x_coord,
+            'y' : field_objects[o].y_coord,
+            't' : field_objects[o].transform
+        }
+        list.append(object_dict)
+
+    return HttpResponse(json.dumps(list))
