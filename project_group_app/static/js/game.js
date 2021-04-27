@@ -1,9 +1,11 @@
 var html_ready = false;
+var gamefield_ready = false;
 
 var live_player = ""
 var live_number = "0"
 var ball_index = 0
 
+var repair_image = 'statis/images/reapir/repair_01.png'
 var bullet_image = '/static/images/bullets/bullet_1.png'
 var turret_image = '/static/images/tanks/tank_01_turret_1.png'
 var chassis_image = '/static/images/tanks/tank_01_chassis_1.png'
@@ -15,6 +17,8 @@ var chassis_image_prefix = '/static/images/tanks/tank_01_chassis_'
 var ww = window.innerWidth;
 var wh = window.innerHeight;
 
+var tank_image_index = 1;
+
 //delay between updates
 var msdelay = 25;
 // scale of the tanks/objects
@@ -24,6 +28,20 @@ var max_rot = 3;
 
 // ballistic list
 var ball_list = [];
+var obj_list = [];
+
+//GameAsset model maps to: object
+// k maps to type
+// f maps to filename
+// w maps to width
+// h maps to height
+// r maps to resistance
+// m maps to max_damage
+// p maps to damage_pot
+// d is damage
+// x maps to x_coord
+// y maps to y_coord
+// t maps to transform
 
 var tank = {
     // 428 is the pixel length of the tank chassis image
@@ -148,54 +166,47 @@ function destroyElement(element_id) {
 
 function checkCreateTanks() {
 
-    if (!existsElement('tank1_chassis_container')) {
-        if (createElement('tank1_chassis_container', 'tank_overlay', 'div')) {
-            (createElement('tank1_chassis', 'tank1_chassis_container', 'img'))
+    for (var ti=1; ti<5;ti++) {
+        if (!existsElement('tank' + ti + '-chassis-container')) {
+            if (createElement('tank' + ti + '-chassis-container', 'tank-overlay', 'div')) {
+                (createElement('tank' + ti + '-chassis', 'tank' + ti + '-chassis-container', 'img'))
+            }
+        }
+        if (!existsElement('tank' + ti + '-turret-container')) {
+            if (createElement('tank' + ti + '-turret-container', 'tank-overlay', 'div')) {
+                (createElement('tank' + ti + '-turret', 'tank' + ti + '-turret-container', 'img'))
+            }
         }
     }
+}
 
-    if (!existsElement('tank1_turret_container')) {
-        if (createElement('tank1_turret_container', 'tank_overlay', 'div')) {
-            (createElement('tank1_turret', 'tank1_turret_container', 'img'))
+function checkObjectsHTML() {
+    if (gamefield_ready) {
+        old_obj_list = obj_list
+        obj_list = []
+        for (var oi=0; oi<old_obj_list.length;oi++) {
+            if (old_obj_list[oi].k == 'trees') {
+                var layer='tree';
+            } else {
+                var layer='object';
+            }
+
+            if (old_obj_list[oi].d < old_obj_list[oi].m) {
+                if (!existsElement(old_obj_list[oi].n + '-container')) {
+                    createElement(old_obj_list[oi].n + '-container', layer + '-overlay', 'div');
+                }
+                if (!existsElement(old_obj_list[oi].n )) {
+                    createElement(old_obj_list[oi].n, old_obj_list[oi].n + '-container', 'img');
+                }
+                obj_list.push(old_obj_list[oi])
+            } else {
+                if (existsElement(old_obj_list[oi].n + '-container')) {
+                    destroyElement(old_obj_list[oi].n + '-container')
+                }
+            }
+
         }
     }
-
-    if (!existsElement('tank2_chassis_container')) {
-        if (createElement('tank2_chassis_container', 'tank_overlay', 'div')) {
-            (createElement('tank2_chassis', 'tank2_chassis_container', 'img'))
-        }
-    }
-
-    if (!existsElement('tank2_turret_container')) {
-        if (createElement('tank2_turret_container', 'tank_overlay', 'div')) {
-            (createElement('tank2_turret', 'tank2_turret_container', 'img'))
-        }
-    }
-
-    if (!existsElement('tank3_chassis_container')) {
-        if (createElement('tank3_chassis_container', 'tank_overlay', 'div')) {
-            (createElement('tank3_chassis', 'tank3_chassis_container', 'img'))
-        }
-    }
-
-    if (!existsElement('tank3_turret_container')) {
-        if (createElement('tank3_turret_container', 'tank_overlay', 'div')) {
-            (createElement('tank3_turret', 'tank3_turret_container', 'img'))
-        }
-    }
-
-    if (!existsElement('tank4_chassis_container')) {
-        if (createElement('tank4_chassis_container', 'tank_overlay', 'div')) {
-            (createElement('tank4_chassis', 'tank4_chassis_container', 'img'))
-        }
-    }
-
-    if (!existsElement('tank4_turret_container')) {
-        if (createElement('tank4_turret_container', 'tank_overlay', 'div')) {
-            (createElement('tank4_turret', 'tank4_turret_container', 'img'))
-        }
-    }
-
 }
 
 function degreestoRunRise(degrees) {
@@ -233,6 +244,7 @@ function degreestoRunRise(degrees) {
 
 function collisionCheck(x, y, xy_half, check, check_half, x_center, y_center) {
     // initialize a counter
+    // console.log(x + ' : ' + y + ' : ' + xy_half + ' : ' + check_half + ' : ' + x_center + ' : ' + y_center)
     var collision = 0;
     var check_x_left = check.x + x_center - check_half;
     var check_x_right = check.x + x_center + check_half;
@@ -251,7 +263,6 @@ function collisionCheck(x, y, xy_half, check, check_half, x_center, y_center) {
         collision+=.5;
     }
     //return 1 when enough collision conditions have been met.
-    // if (collision == 1 && xy_half == 5) {console.log('happened: ' + collision)}
     return ((collision >= 1) ? 1 : 0);
 }
 
@@ -284,6 +295,24 @@ function updateTank(tank_dict, local) {
             var new_y = tank_dict.y + tank_dict.s * tank_dict.runrise.y;
             var adj_x = new_x + tank.x_center;
             var adj_y = new_y + tank.y_center;
+
+            var tot_r = 0
+            for (oi=0; oi<obj_list.length; oi++) {
+                if (obj_list[oi].k == 'trees') {
+                    if (collisionCheck(adj_x, adj_y, tank.half, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4)-35, Math.round((obj_list[oi].w)/2), Math.round((obj_list[oi].h)/2)) == 1) {
+                        obj_list[oi].d+=5;
+                        tank_dict.d+=obj_list[oi].p/(1000/msdelay);
+                        if (tot_r < obj_list[oi].r) {tot_r = obj_list[oi].r}
+                    }
+                } else {
+                    if (collisionCheck(adj_x, adj_y, tank.half, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4)-35, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                        obj_list[oi].d+=5;
+                        tank_dict.d+=obj_list[oi].p/(1000/msdelay);
+                        if (tot_r < obj_list[oi].r) {tot_r = obj_list[oi].r}
+                    }
+                }
+            }
+
             var collisions = 0;
             if (tank_dict.n != tank1.n) {collisions += collisionCheck(adj_x , adj_y, tank.half, tank1, tank.half, tank.x_center, tank.y_center)};
             if (tank_dict.n != tank2.n) {collisions += collisionCheck(adj_x , adj_y, tank.half, tank2, tank.half, tank.x_center, tank.y_center)};
@@ -291,64 +320,95 @@ function updateTank(tank_dict, local) {
             if (tank_dict.n != tank4.n) {collisions += collisionCheck(adj_x , adj_y, tank.half, tank4, tank.half, tank.x_center, tank.y_center)};
 
             if (collisions == 0) {
+                if (tot_r > 100) {tot_r=100}
+                if (tot_r > 0) {
+                    var new_x = tank_dict.x + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.runrise.x);    
+                    var new_y = tank_dict.y + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.runrise.y);
+                    var adj_x = new_x + tank.x_center;
+                    var adj_y = new_y + tank.y_center;
+                } else {
                 tank_dict.x = new_x;
                 tank_dict.y = new_y;
+                }
             } else {
-                tank_dict.d+=5;
+                tank_dict.d+=5/(1000/msdelay);
             }
+
         }
     }
 
     // get battlefield size
-    var bfw = document.getElementById('battlefield_container').getAttribute("width");
-    var bfh = document.getElementById('battlefield_container').getAttribute("height");
+    var bfw = document.getElementById('battlefield-container').getAttribute("width");
+    var bfh = document.getElementById('battlefield-container').getAttribute("height");
     //ensure tank can't leave battlefield boundry
     if (tank_dict.x > bfw - 10) {tank_dict.x = bfw - 10};
     if (tank_dict.x < 10) {tank_dict.x = 10};
     if (tank_dict.y > bfh - 10) {tank_dict.y = bfh - 10};
     if (tank_dict.y < 60) {tank_dict.y = 60};
 
-    tank_image_index = 1 + Math.trunc(tank_dict.d/100)
+    damage_adjust = 1 + Math.trunc(tank_dict.d/1000)
+    tank_image_index = damage_adjust < 11 ? damage_adjust : 11;
+
     //update chassis
-    document.getElementById(tank_dict.n + '_chassis').width = tank.w_chassis; //remove tank_dict.t
-    document.getElementById(tank_dict.n + '_chassis').height = tank.h_chassis; //remove tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis').width = tank.w_chassis; //remove tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis').height = tank.h_chassis; //remove tank_dict.t
 
-    document.getElementById(tank_dict.n + '_chassis').src = chassis_image_prefix + tank_image_index + '.png';
+    document.getElementById(tank_dict.n + '-chassis').src = chassis_image_prefix + tank_image_index + '.png';
 
-    document.getElementById(tank_dict.n + '_chassis_container').style.position = "absolute";
-    document.getElementById(tank_dict.n + '_chassis_container').style.top = tank_dict.y + 'px';
-    document.getElementById(tank_dict.n + '_chassis_container').style.left = tank_dict.x + tank.left_off + 'px'; //removed tank_dict.t
-    document.getElementById(tank_dict.n + '_chassis_container').style.transform = 'rotate(' + tank_dict.t_c + 'deg)';
-    document.getElementById(tank_dict.n + '_chassis_container').style.transformOrigin = tank.to_chassis + "%"; //removed tank_dict.t
-    document.getElementById(tank_dict.n + '_chassis_container').style.filter = 'hue-rotate(' + tank_dict.color + 'deg)';  // invert(' + tank_dict.d / 5000 + ')';
+    document.getElementById(tank_dict.n + '-chassis-container').style.position = "absolute";
+    document.getElementById(tank_dict.n + '-chassis-container').style.top = tank_dict.y + 'px';
+    document.getElementById(tank_dict.n + '-chassis-container').style.left = tank_dict.x + tank.left_off + 'px'; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis-container').style.transform = 'rotate(' + tank_dict.t_c + 'deg)';
+    document.getElementById(tank_dict.n + '-chassis-container').style.transformOrigin = tank.to_chassis + "%"; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis-container').style.filter = 'hue-rotate(' + tank_dict.color + 'deg)';  // invert(' + tank_dict.d / 5000 + ')';
 
     //update turret
-    document.getElementById(tank_dict.n + '_turret').width = tank.w_turret; //removed tank_dict.t
-    document.getElementById(tank_dict.n + '_turret').height = tank.h_turret; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret').width = tank.w_turret; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret').height = tank.h_turret; //removed tank_dict.t
 
-    document.getElementById(tank_dict.n + '_turret').src = turret_image_prefix + tank_image_index + '.png';
+    document.getElementById(tank_dict.n + '-turret').src = turret_image_prefix + tank_image_index + '.png';
 
-    document.getElementById(tank_dict.n + '_turret_container').style.position = "absolute";
-    document.getElementById(tank_dict.n + '_turret_container').style.top = tank_dict.y + tank.top_off + 'px'; //removed tank_dict.t
-    document.getElementById(tank_dict.n + '_turret_container').style.left = tank_dict.x + 'px';
-    document.getElementById(tank_dict.n + '_turret_container').style.transform = 'rotate(' + tank_dict.t_t + 'deg)';
-    document.getElementById(tank_dict.n + '_turret_container').style.transformOrigin = tank.to_turret + "%"; //removed tank_dict.t
-    document.getElementById(tank_dict.n + '_turret_container').style.filter = 'hue-rotate(' + (tank_dict.color + tank_dict.h) + 'deg)';
+    document.getElementById(tank_dict.n + '-turret-container').style.position = "absolute";
+    document.getElementById(tank_dict.n + '-turret-container').style.top = tank_dict.y + tank.top_off + 'px'; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret-container').style.left = tank_dict.x + 'px';
+    document.getElementById(tank_dict.n + '-turret-container').style.transform = 'rotate(' + tank_dict.t_t + 'deg)';
+    document.getElementById(tank_dict.n + '-turret-container').style.transformOrigin = tank.to_turret + "%"; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret-container').style.filter = 'hue-rotate(' + (tank_dict.color + tank_dict.h) + 'deg)';
 
     //update tank data overlay
-    document.getElementById(tank_dict.n + '_data').style.position = "absolute";
-    document.getElementById(tank_dict.n + '_data').width = 500;
-    document.getElementById(tank_dict.n + '_data').height = 50;
-    document.getElementById(tank_dict.n + '_data').style.top = Math.trunc(tank_dict.y + 60) + 'px';
-    document.getElementById(tank_dict.n + '_data').style.left = Math.trunc(tank_dict.x - 10) + 'px';
-    document.getElementById(tank_dict.n + '_data_1').innerHTML = "Tank X: " + Math.trunc(tank_dict.x * 100)/100 + " Y: " + Math.trunc(tank_dict.y * 100)/100;
-    document.getElementById(tank_dict.n + '_data_2').innerHTML = "Damage: " + tank_dict.d;
-    document.getElementById(tank_dict.n + '_data_3').innerHTML = "Heat: " + tank_dict.h;
-    document.getElementById(tank_dict.n + '_data_4').innerHTML = "Speed: " + tank_dict.s + ' ball count: ' + ball_list.length;
+    document.getElementById(tank_dict.n + '-data').style.position = "absolute";
+    document.getElementById(tank_dict.n + '-data').width = 500;
+    document.getElementById(tank_dict.n + '-data').height = 50;
+    document.getElementById(tank_dict.n + '-data').style.top = Math.trunc(tank_dict.y + 60) + 'px';
+    document.getElementById(tank_dict.n + '-data').style.left = Math.trunc(tank_dict.x) + 'px';
+    // document.getElementById(tank_dict.n + '-data_1').innerHTML = "Tank X: " + Math.trunc(tank_dict.x * 100)/100 + " Y: " + Math.trunc(tank_dict.y * 100)/100;
+    document.getElementById(tank_dict.n + '-heat-bar').value = tank_dict.h;
+    document.getElementById(tank_dict.n + '-damage-bar').value = tank_dict.d;
 
     //tank cool down
-    tank_dict.h = ((tank_dict.h > 0) ? tank_dict.h - 10 : 0);
+    tank_dict.h = ((tank_dict.h > 0) ? tank_dict.h - 5 : 0);
+}
 
+function objectsRender() {
+    if (gamefield_ready) {
+        for (var oi=0; oi < obj_list.length; oi++) {
+
+            if (obj_list[oi].k == 'trees') {
+                file_path = '/static/images/trees/'
+            } else {
+                file_path = '/static/images/objects/'
+            }
+
+            document.getElementById(obj_list[oi].n).width = obj_list[oi].w;
+            document.getElementById(obj_list[oi].n).height = obj_list[oi].h;
+            document.getElementById(obj_list[oi].n + '-container').style.position = "absolute";
+            document.getElementById(obj_list[oi].n + '-container').style.top = obj_list[oi].y + 'px';
+            document.getElementById(obj_list[oi].n + '-container').style.left = obj_list[oi].x + 'px';
+            // document.getElementById(obj_list[oi].n + '-container').style.transform = 'rotate(' + obj_list[oi].t + 'deg)';
+            document.getElementById(obj_list[oi].n + '-container').style.transformOrigin = obj_list[oi].w/2 + "%";
+            document.getElementById(obj_list[oi].n).src = file_path + obj_list[oi].f + '.png';
+        }
+    }
 }
 
 function gameplayer1send(data) {
@@ -373,6 +433,28 @@ function gamecommonsend(data) {
 
 function BallSender(ball) {
     gamecommonsend(ball);
+}
+
+function gamefieldRequest() {
+    if (!gamefield_ready) {
+        if (Math.trunc(game_cycle/100) == game_cycle/100) {
+
+            var url = 'http://' + window.location.host + '/game-field-request/1';
+            const xmltreesRequest = new XMLHttpRequest();
+            xmltreesRequest.open("GET", url, true);
+            xmltreesRequest.send();
+
+            xmltreesRequest.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    const data_list = JSON.parse(this.responseText);
+                    for (var oi=0; oi < data_list.length; oi++) {
+                        obj_list.push(data_list[oi]);
+                    }
+                    gamefield_ready = true;
+                }
+            };
+        }
+    }
 }
 
 function tankRender() {
@@ -405,7 +487,7 @@ function tankRender() {
         updateTank(tank3, true);
         if (send) {gameplayer3send(live_tank)}
     } else {
-        if (tank3.c < tank3a.c) {tank1 = Object.assign(tank3, tank3a)}
+        if (tank3.c < tank3a.c) {tank3 = Object.assign(tank3, tank3a)}
         updateTank(tank3, update_others)
     }
     
@@ -424,6 +506,11 @@ function gameLoop(){
     if (html_ready) {
         game_cycle++;
         document.querySelector('#game-metrics-log').value = (game_cycle);
+        gamefieldRequest();
+        if (Math.trunc(game_cycle/50) == game_cycle/50) {
+            checkObjectsHTML();
+            objectsRender();
+        }
         checkCreateTanks();
         tankRender();
 
@@ -437,48 +524,58 @@ function gameLoop(){
                 old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].runrise.x;
                 old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].runrise.y;
                 if (!existsElement(old_list[i].n)) {
-                    if (createElement(old_list[i].n + '_container', 'ballistic_overlay', 'div')) {
-                        (createElement(old_list[i].n, old_list[i].n + '_container', 'img'))
+                    if (createElement(old_list[i].n + '-container', 'ballistic-overlay', 'div')) {
+                        (createElement(old_list[i].n, old_list[i].n + '-container', 'img'))
                     }
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank1, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    // console.log('tank 1 here: ' + old_list[i].c)
-                    tank1.d+=50;
+                    tank1.d+=500;
                     old_list[i].c = 0;
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank2, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    // console.log('tank 2 here: ' + old_list[i].c)
-                    tank2.d+=50;
+                    tank2.d+=500;
                     old_list[i].c = 0;
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank3, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    // console.log('tank 3 here: ' + old_list[i].c)
-                    tank3.d+=50;
+                    tank3.d+=500;
                     old_list[i].c = 0;
                 }
 
                 if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank4, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    // console.log('tank 4 here: ' + old_list[i].c)
-                    tank4.d+=50;
+                    tank4.d+=500;
                     old_list[i].c = 0;
+                }
+
+                for (oi=0; oi<obj_list.length; oi++) {
+                    if (obj_list[oi].k == 'trees') {
+                        if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                            obj_list[oi].d+=500;
+                            old_list[i].c = 0;
+                        }
+                    } else {
+                        if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                            obj_list[oi].d+=500;
+                            old_list[i].c = 0;
+                        }
+                    }
                 }
 
                 document.getElementById(old_list[i].n ).width = 30;
                 document.getElementById(old_list[i].n ).height = 10;
                 document.getElementById(old_list[i].n ).src = bullet_image;
-                document.getElementById(old_list[i].n + '_container').style.position = "absolute";
-                document.getElementById(old_list[i].n + '_container').style.top = (old_list[i].y) + 'px';
-                document.getElementById(old_list[i].n + '_container').style.left = (old_list[i].x) + 'px';
-                document.getElementById(old_list[i].n + '_container').style.transform = 'rotate(' + old_list[i].t + 'deg)';
-                document.getElementById(old_list[i].n + '_container').style.filter = 'hue-rotate(' + old_list[i].c + 'deg)';
+                document.getElementById(old_list[i].n + '-container').style.position = "absolute";
+                document.getElementById(old_list[i].n + '-container').style.top = (old_list[i].y) + 'px';
+                document.getElementById(old_list[i].n + '-container').style.left = (old_list[i].x) + 'px';
+                document.getElementById(old_list[i].n + '-container').style.transform = 'rotate(' + old_list[i].t + 'deg)';
+                document.getElementById(old_list[i].n + '-container').style.filter = 'hue-rotate(' + old_list[i].c + 'deg)';
 
                 ball_list.push(old_list[i]);
 
             } else {
-                destroyElement(old_list[i].n + '_container')
+                destroyElement(old_list[i].n + '-container')
             }
         }
     }
@@ -490,7 +587,7 @@ document.onkeydown = function(e){
 
             // turret fire
             if(e.keyCode == 71){
-                if (live_tank.h < 1000) {
+                if (live_tank.h < 681) {
                     ball_index++;
                     var new_ball = {
                         k : 'ball',
@@ -498,18 +595,17 @@ document.onkeydown = function(e){
                         c : 180,
                         s : 20,
                         t : live_tank.t_t,
-                        to : tank.to_chassis, ///removed live_tank.t
+                        to : tank.to_chassis
                     }
 
                     new_ball.runrise = degreestoRunRise(new_ball.t)
                     adjust = ((Math.abs(new_ball.runrise.x) + Math.abs(new_ball.runrise.y) > 1.7) ? .72 : 1);
-                    // console.log(new_ball.runrise.x + ' : ' + new_ball.runrise.y);
                     new_ball.x = (live_tank.x + tank.x_center) + (new_ball.runrise.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
                     new_ball.y = (live_tank.y + tank.y_center) + (new_ball.runrise.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
 
                     BallSender(new_ball);
                     // ball_list.push(new_ball);
-                    live_tank.h+=750;
+                    live_tank.h+=330;
                     live_tank.e = true;
                 }
             }
@@ -606,7 +702,7 @@ window.addEventListener("load", function() {
     tank1a = Object.assign(tank1, tank1);
     tank2a = Object.assign(tank2, tank2);
     tank3a = Object.assign(tank3, tank3);
-    tank4a = Object.assign(tank4, tank4);
+    tank4a = Object.assign(tank4, tank4);    
 
     gameplayer1 = document.getElementById('game-player1').textContent;
     gameplayer1Socket = new WebSocket('ws://' + window.location.host + '/ws/gp/' + gameplayer1 + '/');
@@ -642,7 +738,7 @@ window.addEventListener("load", function() {
             if (dict.k == 'chat') {
                 document.querySelector('#game-player2-chat-log').value = (dict.s + ' says, ' + dict.m);
             } else if (dict.k == 'tank') {
-                tank2a = Object.assign(tank2a, dict);
+                tank2 = Object.assign(tank2, dict);
                 tank2_recv++;
                 document.querySelector('#game-player2-chat-log').value = (tank2_recv);
             }
