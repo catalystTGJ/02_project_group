@@ -4,6 +4,20 @@ var html_ready = false;
 var msdelay = 25;
 // counter to know how much time has gone by since execution.
 var main_loop_cycle = 0;
+// boolean to determine the state of the buttons.
+var buttons_enabled = true;
+
+function disableButtons() {
+    if (html_ready && buttons_enabled){
+        buttons_enabled = false;
+        for (var game_index=1; game_index < 5; game_index++) {
+            for (var player_index=1; player_index < 5; player_index++) {
+                var result = document.getElementById("button-" + game_index + '-' + player_index).disabled;
+                console.log(result)
+            }
+        }
+    }
+}
 
 
 // This is the main loop.
@@ -12,9 +26,7 @@ var main_loop_cycle = 0;
 function mainLoop(){
     if (html_ready) {
         main_loop_cycle++;
-
-
-
+        disableButtons();
     }
 }
 
@@ -43,7 +55,7 @@ document.onkeyup = function(e){
 // the very last step in this section will set a boolean variable,
 // that will allow all the asyncronous sections of the code to do work.
 window.addEventListener("load", function() {
-
+ 
 
 
     html_ready = true;
