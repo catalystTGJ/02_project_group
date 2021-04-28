@@ -10,55 +10,66 @@
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+    <script src="{% static 'js/game_dash.js' %}"></script>
 </head>
 
 <body>
-    <div class="btn-group mr-2" role="group" aria-label="game_dash_group">
-        <button type="button" class="btn btn-secondary">Select</button>
-        <button type="button" class="btn btn-secondary">Metrics</button>
-        <button type="button" class="btn btn-secondary">Sign Out</button>
+    <div class="container py-3 justify-content-center">
+        <div class="row">
+            <div class="col-4 my-auto">
+                <h2>Dash</h2>
+            </div>
+            <div class="col-8 my-auto text-right">
+                <a class="btn btn-light btn-sm" href="/game-pick">Select</a>
+                <a class="btn btn-dark btn-sm" href="/game-dash">Dash</a>
+                <a class="btn btn-light btn-sm" href="/game-rank">Metrics</a>
+                <a class="btn btn-warning btn-sm" href="/signout">Sign-out</a>
+            </div>
+        </div>
+
+        <hr>
+
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Game</th>
+                    <th scope="col">Player 1 {{ gameActive.gameUser_id }}</th>
+                    <th scope="col">Player 2</th>
+                    <th scope="col">Player 3</th>
+                    <th scope="col">Player 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1 {{gameActive.gameName }}</th>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">2 {{gameActive.gameName }}</th>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">3 {{gameActive.gameName }}</th>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">4 {{gameActive.gameName }}</th>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
     </div>
-    <table class="table">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Game</th>
-                <th scope="col">Player 1 {{ gameActive.gameUser_id }}</th>
-                <th scope="col">Player 2</th>
-                <th scope="col">Player 3</th>
-                <th scope="col">Player 4</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th scope="row">1 {{gameActive.gameName }}</th>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-            </tr>
-            <tr>
-                <th scope="row">2 {{gameActive.gameName }}</th>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-            </tr>
-            <tr>
-                <th scope="row">3 {{gameActive.gameName }}</th>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-            </tr>
-            <tr>
-                <th scope="row">4 {{gameActive.gameName }}</th>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-
-
-
 
 </body>
 

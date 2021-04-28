@@ -8,9 +8,26 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         {% load static %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+        <script src="{% static 'js/game_rank.js' %}"></script>
     </head>
     <body>
 
+        <div class="container py-3 justify-content-center">
+            <div class="row">
+                <div class="col-4 my-auto">
+                    <h2>Metrics</h2>
+                </div>
+                <div class="col-8 my-auto text-right">
+                    <a class="btn btn-light btn-sm" href="/game-pick">Select</a>
+                    <a class="btn btn-light btn-sm" href="/game-dash">Dash</a>
+                    <a class="btn btn-dark btn-sm" href="/game-rank">Metrics</a>
+                    <a class="btn btn-warning btn-sm" href="/signout">Sign-out</a>
+                </div>
+            </div>
+
+            <hr>
+
+        </div>
 
     </body>
 </html>
