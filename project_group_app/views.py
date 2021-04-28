@@ -25,7 +25,7 @@ def signin(request):
 
 # sign-off buttion will flush session
 # it might be desirable to write some stuff for the user into the db, but i'm not sure we need this.
-def signoff(request):
+def signout(request):
     request.session.flush()
     return redirect('/')
 
