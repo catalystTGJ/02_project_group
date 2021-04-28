@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from .models import GameActive, GameAsset, GameField, populateAssets, populateGameActive, populateGameField
+from .models import GameUser, GameActive, GameAsset, GameField, populateAssets, populateGameActive, populateGameField, populateTestUsers
 import random
 import json
 
@@ -33,7 +33,13 @@ def signout(request):
 # notice there is a 'require login' decorator here to send back to sign-in registration.
 @login_required(login_url='/signin')
 def game_pick(request):
-    return render(request, "game_pick.html")
+    user_id = request.session['_auth_user_id']
+    context = {
+        'user' : User.objects.get(id=user_id)
+    }
+    return render(request, "game_pick.html", context)
+
+    # return HttpResponse(request.session.items())
 
 # game_play will be where the game actually happens.
 # notice there is a 'require login' decorator here to send back to sign-in registration.
@@ -79,8 +85,9 @@ def game_chat(request):
 
 def utility(request):
     #populateAssets()
-    populateGameActive()
-    return redirect ("/game-dash")
+    #populateGameActive()
+    populateTestUsers()
+    return redirect ("/game-pick")
 
 def game_field_generate(request, game_number):
     populateGameField(game_number)

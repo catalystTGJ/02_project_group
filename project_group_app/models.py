@@ -91,6 +91,32 @@ class GameField(models.Model):
     y_coord = models.IntegerField()
     transform = models.IntegerField()
 
+def populateTestUsers():
+    # create test user accounts if they are needed
+    user_list = ['testplayer1','testplayer2','testplayer3','testplayer4','testplayer5','testplayer6','testplayer7','testplayer8']
+    user_pass = 'djangoFun'
+    user_email = 'real@nope.not'
+    for user_item in user_list:
+        users = User.objects.filter(username=user_item)
+        if len(users) == 0:
+            user = User.objects.create_user(user_item, user_email, user_pass)
+        else:
+            user = users[0]
+        game_users  = GameUser.objects.filter(user=user)
+        if len(game_users) == 0:
+            game_user = GameUser.objects.create(
+                user=user,
+                screen_name = user_item,
+                high_score = 0,
+                games_won = 0,
+                games_lost = 0,
+                games_draw = 0,
+                damage_high = 0,
+                damage_low = 0
+                )
+        else:
+            game_user = game_users[0]
+
 def populateAssets():
     # clear GameAsset table first, so that we can easily repopulate the table whenever we tweak anything.
     objects = GameAsset.objects.all()
