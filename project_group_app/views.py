@@ -1,5 +1,6 @@
 from django.shortcuts import HttpResponse, render, redirect
 from django.contrib import messages
+from django.db.models import Q
 
 #needed for use of built-in django auth
 from django.contrib.auth.decorators import login_required
@@ -89,11 +90,105 @@ def utility(request):
     populateTestUsers()
     return redirect ("/game-pick")
 
+def games_players_request(request):
+    print('games_players_request')
+    games = GameActive.objects.all()
+    list = []
+    for game in games:
+        if game.gameuser_id1 is None:
+            screen_name1 = ""
+        else:
+            screen_name1 = game.gameuser_id1.screen_name
+
+        if game.gameuser_id2 is None:
+            screen_name2 = ""
+        else:
+            screen_name2 = game.gameuser_id2.screen_name
+
+        if game.gameuser_id3 is None:
+            screen_name3 = ""
+        else:
+            screen_name3 = game.gameuser_id3.screen_name
+
+        if game.gameuser_id4 is None:
+            screen_name4 = ""
+        else:
+            screen_name4 = game.gameuser_id4.screen_name
+        list.append(
+            {
+                '1' : screen_name1,
+                '2' : screen_name2,
+                '3' : screen_name3,
+                '4' : screen_name4,
+            }
+        )
+
+    return HttpResponse(json.dumps(list))
+
+def game_player_select(request):
+    result = "nope!"
+    if request.method == "POST":
+        json_items = json.load(request)
+        game_number = json_items['game_number']
+        game_name = f'Game {game_number}'
+        player_number = int(json_items['player_number'])
+        user_id = json_items['user_id']
+        user = User.objects.get(id=user_id)
+        game_user = GameUser.objects.get(user=user)
+
+        previous_game = GameActive.objects.filter(gameuser_id1=game_user)
+        if len(previous_game) == 1:
+            previous_game[0].gameuser_id1 = None
+            previous_game[0].save()
+
+        previous_game = GameActive.objects.filter(gameuser_id2=game_user)
+        if len(previous_game) == 1:
+            previous_game[0].gameuser_id2 = None
+            previous_game[0].save()
+
+        previous_game = GameActive.objects.filter(gameuser_id3=game_user)
+        if len(previous_game) == 1:
+            previous_game[0].gameuser_id3 = None
+            previous_game[0].save()
+
+        previous_game = GameActive.objects.filter(gameuser_id4=game_user)
+        if len(previous_game) == 1:
+            previous_game[0].gameuser_id4 = None
+            previous_game[0].save()
+
+        game = GameActive.objects.filter(game_name=game_name)
+        if len(game) == 1:
+
+            if player_number == 1 and game[0].gameuser_id1 is None:
+                game[0].gameuser_id1 = game_user
+                result = 'done 1'
+            elif player_number == 2 and game[0].gameuser_id2 is None:
+                game[0].gameuser_id2 = game_user
+                result = 'done 2'
+            elif player_number == 3 and game[0].gameuser_id3 is None:
+                game[0].gameuser_id3 = game_user
+                result = 'done 3'
+            elif player_number == 4 and game[0].gameuser_id4 is None:
+                game[0].gameuser_id4 = game_user
+                result = 'done 4'
+            game[0].save()
+
+    return HttpResponse(json.dumps(result))
+
+def games_players_clear(request):
+    games = GameActive.objects.all()
+    for game in games:
+        game.gameuser_id1 = None
+        game.gameuser_id2 = None
+        game.gameuser_id3 = None
+        game.gameuser_id4 = None
+        game.save()
+    return redirect (f'/games-players-request')
+
 def game_field_generate(request, game_number):
     populateGameField(game_number)
     return redirect (f'/game-play/game1player2')
     # return redirect (f'/game-field-request/{game_number}')
-
 
 def game_field_request(request, game_number):
 
@@ -118,3 +213,12 @@ def game_field_request(request, game_number):
         list.append(object_dict)
 
     return HttpResponse(json.dumps(list))
+
+def testpost(request):
+    if request.method == "GET":
+        return render(request, "utility.html")
+
+    if request.method == "POST":
+        stuff = json.load(request)
+        print(stuff['game_number'])
+        return HttpResponse("done")

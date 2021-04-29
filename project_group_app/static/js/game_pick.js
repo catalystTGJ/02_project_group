@@ -1,24 +1,69 @@
 // boolean to know when its safe to work with the DOM.
 var html_ready = false;
 // delay in milliseconds.
-var msdelay = 25;
+var msdelay = 250;
 // counter to know how much time has gone by since execution.
 var main_loop_cycle = 0;
 // boolean to determine the state of the buttons.
 var buttons_enabled = true;
+
+var game_num = ""
+var player_num = ""
 
 function disableButtons() {
     if (html_ready && buttons_enabled){
         buttons_enabled = false;
         for (var game_index=1; game_index < 5; game_index++) {
             for (var player_index=1; player_index < 5; player_index++) {
-                var result = document.getElementById("button-" + game_index + '-' + player_index).disabled;
+                var result = document.getElementById("button-" + game_index + '-' + player_index).disabled = true;
                 console.log(result)
             }
         }
     }
 }
 
+function gamesplayersCheck() {
+    if (html_ready) {
+        if (Math.trunc(main_loop_cycle/10) == main_loop_cycle/10) {
+
+            var url = 'http://' + window.location.host + '/games-players-request';
+            const gamesplayersRequest = new XMLHttpRequest();
+            gamesplayersRequest.open("GET", url, true);
+            gamesplayersRequest.send();
+
+            gamesplayersRequest.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    const data_list = JSON.parse(this.responseText);
+                    for (var i=0; i<4; i++) {
+                        for (var player=1; player<5; player++) {
+                            if (data_list[i][player] != "") {
+                                document.getElementById("button-" + (i + 1) + '-' + player).innerHTML = data_list[i][player];
+                                document.getElementById("button-" + (i + 1) + '-' + player).disabled = true;
+                            } else {
+                                document.getElementById("button-" + (i + 1) + '-' + player).innerHTML = 'Player ' + [player];
+                                document.getElementById("button-" + (i + 1) + '-' + player).disabled = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function gameplayerselect() {
+    if (html_ready) {
+        var gamesplayerPost = new XMLHttpRequest();
+        gamesplayerPost.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.responseText)
+            }
+        };
+        gamesplayerPost.open("POST", "/game-player-select", true);
+        gamesplayerPost.setRequestHeader('X-CSRFToken', csrf_token);
+        gamesplayerPost.send(JSON.stringify({game_number : game_num, player_number : player_num, user_id : current_user_id}));
+    }
+}
 
 // This is the main loop.
 // When nothing else is happening.
@@ -26,14 +71,14 @@ function disableButtons() {
 function mainLoop(){
     if (html_ready) {
         main_loop_cycle++;
-        disableButtons();
+        gamesplayersCheck();
+        // disableButtons();
     }
 }
 
 //triggered when keys are held down (pressed but not necessarily released).
 document.onkeydown = function(e){
     if (html_ready) {
-
 
 
     }
@@ -43,11 +88,8 @@ document.onkeydown = function(e){
 document.onkeyup = function(e){
     if (html_ready) {
 
-
-
     }
 }
-
 
 // This block of code will execute when the HTML DOM has finished loading.
 // These steps need to happen at a "global" level, so that the information
@@ -55,9 +97,19 @@ document.onkeyup = function(e){
 // the very last step in this section will set a boolean variable,
 // that will allow all the asyncronous sections of the code to do work.
 window.addEventListener("load", function() {
- 
+    csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    current_user_id = document.getElementById("user-id").innerHTML
 
-
+    let btns = document.querySelectorAll('button');
+    for (a_button of btns) {
+        a_button.addEventListener('click', function() {
+            if (this.id.startsWith("button")) {
+                game_num = this.id.substring(7,8)
+                player_num = this.id.substring(9,10)
+                gameplayerselect();
+            }
+        });
+    }
     html_ready = true;
 });
 
