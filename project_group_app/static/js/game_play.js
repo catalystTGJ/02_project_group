@@ -1,5 +1,8 @@
 var html_ready = false;
 var gamefield_ready = false;
+var player_ready = false;
+var tank_controls = true;
+var chat_target = 5;
 
 var live_player = ""
 var live_number = "0"
@@ -389,6 +392,73 @@ function updateTank(tank_dict, local) {
     tank_dict.h = ((tank_dict.h > 0) ? tank_dict.h - 5 : 0);
 }
 
+function ballisticsRender() {
+    //work the ballistic list
+    old_list = ball_list;
+    ball_list = [];
+    for (i=0; i<old_list.length; i++) {
+        if (old_list[i].c > 0) {
+            old_list[i].c-=2;
+            old_list[i].runrise = degreestoRunRise(old_list[i].t);
+            old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].runrise.x;
+            old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].runrise.y;
+            if (!existsElement(old_list[i].n)) {
+                if (createElement(old_list[i].n + '-container', 'ballistic-overlay', 'div')) {
+                    (createElement(old_list[i].n, old_list[i].n + '-container', 'img'))
+                }
+            }
+
+            if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank1, tank.half - 10, tank.x_center, tank.y_center) == 1) {
+                tank1.d+=500;
+                old_list[i].c = 0;
+            }
+
+            if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank2, tank.half - 10, tank.x_center, tank.y_center) == 1) {
+                tank2.d+=500;
+                old_list[i].c = 0;
+            }
+
+            if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank3, tank.half - 10, tank.x_center, tank.y_center) == 1) {
+                tank3.d+=500;
+                old_list[i].c = 0;
+            }
+
+            if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank4, tank.half - 10, tank.x_center, tank.y_center) == 1) {
+                tank4.d+=500;
+                old_list[i].c = 0;
+            }
+
+            for (oi=0; oi<obj_list.length; oi++) {
+                if (obj_list[oi].k == 'trees') {
+                    if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                        obj_list[oi].d+=500;
+                        old_list[i].c = 0;
+                    }
+                } else {
+                    if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                        obj_list[oi].d+=500;
+                        old_list[i].c = 0;
+                    }
+                }
+            }
+
+            document.getElementById(old_list[i].n ).width = 30;
+            document.getElementById(old_list[i].n ).height = 10;
+            document.getElementById(old_list[i].n ).src = bullet_image;
+            document.getElementById(old_list[i].n + '-container').style.position = "absolute";
+            document.getElementById(old_list[i].n + '-container').style.top = (old_list[i].y) + 'px';
+            document.getElementById(old_list[i].n + '-container').style.left = (old_list[i].x) + 'px';
+            document.getElementById(old_list[i].n + '-container').style.transform = 'rotate(' + old_list[i].t + 'deg)';
+            document.getElementById(old_list[i].n + '-container').style.filter = 'hue-rotate(' + old_list[i].c + 'deg)';
+
+            ball_list.push(old_list[i]);
+
+        } else {
+            destroyElement(old_list[i].n + '-container')
+        }
+    }
+}
+
 function objectsRender() {
     if (gamefield_ready) {
         for (var oi=0; oi < obj_list.length; oi++) {
@@ -411,6 +481,8 @@ function objectsRender() {
     }
 }
 
+
+
 function gameplayer1send(data) {
     gameplayer1Socket.send(JSON.stringify(data));
 }
@@ -429,6 +501,10 @@ function gameplayer4send(data) {
 
 function gamecommonsend(data) {
     gamecommonSocket.send(JSON.stringify(data));
+}
+
+function gamemetricssend(data) {
+    gamemetricsSocket.send(JSON.stringify(data));
 }
 
 function BallSender(ball) {
@@ -502,10 +578,23 @@ function tankRender() {
     live_tank.e = false;
 }
 
+function changeConsole() {
+    if (tank_controls) {
+        console_class = "container-fluid metrics bg-gray";
+        document.getElementById("chat-input").blur();
+    } else {
+        console_class = "container-fluid metrics bg-dark";
+        document.getElementById("chat-input").focus();
+    }
+    document.getElementById("console").className = console_class;
+}
+
 function gameLoop(){
     if (html_ready) {
         game_cycle++;
-        document.querySelector('#game-metrics-log').value = (game_cycle);
+        document.querySelector('#cycles').value = (game_cycle);
+
+        changeConsole();
         gamefieldRequest();
         if (Math.trunc(game_cycle/50) == game_cycle/50) {
             checkObjectsHTML();
@@ -513,80 +602,16 @@ function gameLoop(){
         }
         checkCreateTanks();
         tankRender();
-
-        //work the ballistic list
-        old_list = ball_list;
-        ball_list = [];
-        for (i=0; i<old_list.length; i++) {
-            if (old_list[i].c > 0) {
-                old_list[i].c-=2;
-                old_list[i].runrise = degreestoRunRise(old_list[i].t);
-                old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].runrise.x;
-                old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].runrise.y;
-                if (!existsElement(old_list[i].n)) {
-                    if (createElement(old_list[i].n + '-container', 'ballistic-overlay', 'div')) {
-                        (createElement(old_list[i].n, old_list[i].n + '-container', 'img'))
-                    }
-                }
-
-                if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank1, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    tank1.d+=500;
-                    old_list[i].c = 0;
-                }
-
-                if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank2, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    tank2.d+=500;
-                    old_list[i].c = 0;
-                }
-
-                if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank3, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    tank3.d+=500;
-                    old_list[i].c = 0;
-                }
-
-                if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank4, tank.half - 10, tank.x_center, tank.y_center) == 1) {
-                    tank4.d+=500;
-                    old_list[i].c = 0;
-                }
-
-                for (oi=0; oi<obj_list.length; oi++) {
-                    if (obj_list[oi].k == 'trees') {
-                        if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
-                            obj_list[oi].d+=500;
-                            old_list[i].c = 0;
-                        }
-                    } else {
-                        if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
-                            obj_list[oi].d+=500;
-                            old_list[i].c = 0;
-                        }
-                    }
-                }
-
-                document.getElementById(old_list[i].n ).width = 30;
-                document.getElementById(old_list[i].n ).height = 10;
-                document.getElementById(old_list[i].n ).src = bullet_image;
-                document.getElementById(old_list[i].n + '-container').style.position = "absolute";
-                document.getElementById(old_list[i].n + '-container').style.top = (old_list[i].y) + 'px';
-                document.getElementById(old_list[i].n + '-container').style.left = (old_list[i].x) + 'px';
-                document.getElementById(old_list[i].n + '-container').style.transform = 'rotate(' + old_list[i].t + 'deg)';
-                document.getElementById(old_list[i].n + '-container').style.filter = 'hue-rotate(' + old_list[i].c + 'deg)';
-
-                ball_list.push(old_list[i]);
-
-            } else {
-                destroyElement(old_list[i].n + '-container')
-            }
-        }
+        ballisticsRender();
     }
 }
 
 document.onkeydown = function(e){
     if (html_ready) {
-        if (live_tank != {}) {
+        if (live_tank != {} && player_ready && tank_controls) {
 
             // turret fire
-            if(e.keyCode == 71){
+            if(e.key == 'g' || e.key == 'G'){
                 if (live_tank.h < 681) {
                     ball_index++;
                     var new_ball = {
@@ -604,7 +629,6 @@ document.onkeydown = function(e){
                     new_ball.y = (live_tank.y + tank.y_center) + (new_ball.runrise.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
 
                     BallSender(new_ball);
-                    // ball_list.push(new_ball);
                     live_tank.h+=330;
                     live_tank.e = true;
                 }
@@ -673,6 +697,32 @@ document.onkeydown = function(e){
                     //tank1.r_c = 0;
                 }
                 live_tank.e = true;
+            }
+        }
+    }
+}
+
+document.onkeyup = function(e){
+    if (html_ready) {
+        if (e.key == ';') {
+            tank_controls = tank_controls ? false : true;
+        } else if (!tank_controls) {
+            all_text = document.querySelector('#chat-input').value
+            all_text = all_text.replace(/(\r\n|\n|\r)/gm,"");
+            document.querySelector('#chat-input').value = all_text.substring(0,30)
+            if (e.key == 'F1') {chat_target='1'}
+            if (e.key == 'F2') {chat_target='2'}
+            if (e.key == 'F3') {chat_target='3'}
+            if (e.key == 'F4') {chat_target='4'}
+            if (e.key == 'F5') {chat_target='5'}
+            if (e.key == 'F6') {chat_target='6'}
+            if (e.key == 'Enter') {
+                if (chat_target < 6) {
+                    gamecommonsend({'k':'chat','n':'chat'+ chat_target ,'m': all_text })
+                } else {
+                    gamemetricssend({'k':'chat','n':'chat'+ chat_target ,'m': all_text })
+                }
+                document.querySelector('#chat-input').value = "";
             }
         }
     }
@@ -810,7 +860,11 @@ window.addEventListener("load", function() {
             ball_list.push(dict);
         }
         if (dict.k == 'chat') {
-            document.querySelector('#game-common-log').value = (dict.m);
+            chat_number = dict.n.charAt(dict.n.length - 1);
+            if (live_number == chat_number || chat_number == 5) {
+                curr_text = document.querySelector('#game-common-log').value
+                document.querySelector('#game-common-log').value = (dict.m) + '\n' + curr_text
+            } 
         }
     };
 
@@ -823,7 +877,12 @@ window.addEventListener("load", function() {
 
     gamemetricsSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        document.querySelector('#game-metrics-log').value = (data);
+        const dict = JSON.parse(data);
+        if (dict.k == 'chat') {
+            curr_text = document.querySelector('#game-common-log').value
+            document.querySelector('#game-common-log').value = (dict.m) + '\n' + curr_text
+        }
+        // document.querySelector('#game-metrics-log').value = (data);
     };
 
     gamemetricsSocket.onclose = function(e) {
@@ -835,6 +894,7 @@ window.addEventListener("load", function() {
     tank2_recv = 0;
     tank3_recv = 0;
     tank4_recv = 0;
+    player_ready = true;
     html_ready = true;
 });
 
