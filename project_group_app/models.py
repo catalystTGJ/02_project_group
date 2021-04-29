@@ -241,47 +241,7 @@ def populateGameField(game_number):
         {'xl' : 1240, 'xr' : 1400, 'yt' : 540, 'yb' : 700},
     ]
 
-    objects = GameAsset.objects.filter(type='trees')
-    for t in range(random.randint(30, 100)):
-        
-        objects_index = random.randint(0, len(objects)-1)
-        w = objects[objects_index].width
-        h = objects[objects_index].height
-        while True:
-            rx = random.randint(1, 1400 - objects[objects_index].width)
-            ry = random.randint(1, 700 - objects[objects_index].height)
-            rt = random.randint(0, 359)
-
-            free_space = True
-            for u in used_space:
-                inside = 0
-                if rx > u['xl'] and rx < u['xr']:
-                    inside+=.5
-                elif (rx + w) > u['xl'] and (rx + w) < u['xr']:
-                    inside+=.5
-
-                if ry > u['yt'] and ry < u['yb']:
-                    inside+=.5
-                elif (ry + h) > u['yt'] and (ry + h) < u['yb']:
-                    inside+=.5
-
-                if inside > .5:
-                    free_space = False
-                    break
-            if free_space:
-                used_space.append({'xl' : rx, 'xr' : rx+w, 'yt' : ry, 'yb' : ry+h})
-                break
-
-        new_item = GameField.objects.create(
-            gameactive = game[0],
-            gameasset = objects[objects_index],
-            html_name = f'tree{t}',
-            damage = 0,
-            x_coord = rx,
-            y_coord = ry,
-            transform = rt
-        )
-
+    # populates other items
     objects = GameAsset.objects.filter(type='objects')
     for t in range(random.randint(10, 20)):
             
@@ -317,6 +277,48 @@ def populateGameField(game_number):
             gameactive = game[0],
             gameasset = objects[objects_index],
             html_name = f'object{t}',
+            damage = 0,
+            x_coord = rx,
+            y_coord = ry,
+            transform = rt
+        )
+
+    # populates the trees
+    objects = GameAsset.objects.filter(type='trees')
+    for t in range(random.randint(30, 100)):
+        
+        objects_index = random.randint(0, len(objects)-1)
+        w = objects[objects_index].width
+        h = objects[objects_index].height
+        while True:
+            rx = random.randint(1, 1400 - objects[objects_index].width)
+            ry = random.randint(1, 700 - objects[objects_index].height)
+            rt = random.randint(0, 359)
+
+            free_space = True
+            for u in used_space:
+                inside = 0
+                if rx > u['xl'] and rx < u['xr']:
+                    inside+=.5
+                elif (rx + w) > u['xl'] and (rx + w) < u['xr']:
+                    inside+=.5
+
+                if ry > u['yt'] and ry < u['yb']:
+                    inside+=.5
+                elif (ry + h) > u['yt'] and (ry + h) < u['yb']:
+                    inside+=.5
+
+                if inside > .5:
+                    free_space = False
+                    break
+            if free_space:
+                used_space.append({'xl' : rx, 'xr' : rx+w, 'yt' : ry, 'yb' : ry+h})
+                break
+
+        new_item = GameField.objects.create(
+            gameactive = game[0],
+            gameasset = objects[objects_index],
+            html_name = f'tree{t}',
             damage = 0,
             x_coord = rx,
             y_coord = ry,
