@@ -90,7 +90,7 @@ var tank = {
 //r_c is the rotation amount for chassis
 //r_t is the rotation amount for turret
 //s is the speed for chassis
-//runrise is a dictionary of x,y cooridinate values for run/rise
+//rr is a dictionary of x,y cooridinate values for run/rise
 
 var tank1 = {
     k : 'tank',
@@ -106,7 +106,7 @@ var tank1 = {
     r_c : 0,
     r_t : 0,
     s : 0,
-    runrise : {'x' : 0, 'y' : 0}
+    rr : {'x' : 0, 'y' : 0}
 }
 
 var tank2 = {
@@ -123,7 +123,7 @@ var tank2 = {
     r_c: 0,
     r_t: 0,
     s: 0,
-    runrise: {'x' : 0, 'y' : 0}
+    rr: {'x' : 0, 'y' : 0}
 }
 
 var tank3 = {
@@ -140,7 +140,7 @@ var tank3 = {
     r_c: 0,
     r_t: 0,
     s: 0,
-    runrise: {'x' : 0, 'y' : 0}
+    rr: {'x' : 0, 'y' : 0}
 }
 
 var tank4 = {
@@ -157,7 +157,7 @@ var tank4 = {
     r_c: 0,
     r_t: 0,
     s: 0,
-    runrise: {'x' : 0, 'y' : 0}
+    rr: {'x' : 0, 'y' : 0}
 }
 
 function sound(src) {
@@ -313,13 +313,13 @@ function updateTank(tank_dict, local) {
         }
 
         //calculate run rise, as it must exist in order for initial motion
-        tank_dict.runrise = degreestoRunRise(tank_dict.t_c);
+        tank_dict.rr = degreestoRunRise(tank_dict.t_c);
 
         // when chassis drive occurs
         if (tank_dict.s != 0) {
             tank_dict.e = true;
-            var new_x = tank_dict.x + tank_dict.s * tank_dict.runrise.x;
-            var new_y = tank_dict.y + tank_dict.s * tank_dict.runrise.y;
+            var new_x = tank_dict.x + tank_dict.s * tank_dict.rr.x;
+            var new_y = tank_dict.y + tank_dict.s * tank_dict.rr.y;
             var adj_x = new_x + tank.x_center;
             var adj_y = new_y + tank.y_center;
 
@@ -349,8 +349,8 @@ function updateTank(tank_dict, local) {
             if (collisions == 0) {
                 if (tot_r > 100) {tot_r=100}
                 if (tot_r > 0) {
-                    var new_x = tank_dict.x + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.runrise.x);    
-                    var new_y = tank_dict.y + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.runrise.y);
+                    var new_x = tank_dict.x + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.rr.x);    
+                    var new_y = tank_dict.y + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.rr.y);
                     var adj_x = new_x + tank.x_center;
                     var adj_y = new_y + tank.y_center;
                 } else {
@@ -422,9 +422,9 @@ function ballisticsRender() {
     for (i=0; i<old_list.length; i++) {
         if (old_list[i].c > 0) {
             old_list[i].c-=2;
-            old_list[i].runrise = degreestoRunRise(old_list[i].t);
-            old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].runrise.x;
-            old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].runrise.y;
+            old_list[i].rr = degreestoRunRise(old_list[i].t);
+            old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].rr.x;
+            old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].rr.y;
             if (!existsElement(old_list[i].n)) {
                 if (createElement(old_list[i].n + '-container', 'ballistic-overlay', 'div')) {
                     (createElement(old_list[i].n, old_list[i].n + '-container', 'img'))
@@ -634,6 +634,7 @@ function uploadgameuserStats() {
                     z : gameuser_status,
                     g : live_player_game,
                     p : live_player_number,
+                    n : live_player_name,
                     s : gameuser_score,
                     d : live_tank.d,
                 }
@@ -645,6 +646,7 @@ function uploadgameuserStats() {
                 }
                 gameuserstatsPost.open("POST", "/game-player-update", true);
                 gameuserstatsPost.setRequestHeader('X-CSRFToken', csrf_token);
+                // console.log(JSON.stringify(player_stats))
                 gameuserstatsPost.send(JSON.stringify(player_stats));
             }
         }
@@ -691,10 +693,10 @@ document.onkeydown = function(e){
                         o : gameuser_id
                     }
 
-                    new_ball.runrise = degreestoRunRise(new_ball.t)
-                    adjust = ((Math.abs(new_ball.runrise.x) + Math.abs(new_ball.runrise.y) > 1.7) ? .72 : 1);
-                    new_ball.x = (live_tank.x + tank.x_center) + (new_ball.runrise.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
-                    new_ball.y = (live_tank.y + tank.y_center) + (new_ball.runrise.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
+                    new_ball.rr = degreestoRunRise(new_ball.t)
+                    adjust = ((Math.abs(new_ball.rr.x) + Math.abs(new_ball.rr.y) > 1.7) ? .72 : 1);
+                    new_ball.x = (live_tank.x + tank.x_center) + (new_ball.rr.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
+                    new_ball.y = (live_tank.y + tank.y_center) + (new_ball.rr.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
 
                     BallSender(new_ball);
                     live_tank.h+=330;
@@ -806,8 +808,8 @@ window.addEventListener("load", function() {
     gameuser_id = Number(document.getElementById("user-id").innerHTML);
     gameuser_score = Number(document.getElementById("live-score").innerHTML);
     gameuser_damage = Number(document.getElementById("live-damage").innerHTML);
-    screen_name = document.getElementById("user-screen-name").innerHTML;
     live_player = document.getElementById('live-player').innerHTML;
+    live_player_name = document.getElementById("live-name").innerHTML;
     live_player_number = live_player.charAt(live_player.length - 1);
     live_player_game = live_player.charAt(4);
     player1_name = document.getElementById("game-player1-name").innerHTML;

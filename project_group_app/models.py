@@ -91,6 +91,80 @@ class GameField(models.Model):
     y_coord = models.IntegerField()
     transform = models.IntegerField()
 
+def gameplayerPath(game_user, action=''):
+    result = ""
+
+    game = GameActive.objects.filter(gameuser_id1=game_user)
+    if len(game) == 1:
+        result = f'game{game[0].game_name[-1]}player1'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'name' : game[0].gameuser_id1.screen_name,
+                'score' : game[0].score1,
+                'damage' : game[0].damage1
+            }
+        elif action == "clear":
+            game[0].gameuser_id1 = None
+            game[0].status1 = 0
+            game[0].score1 = 0
+            game[0].damage1 = 0
+            game[0].save()
+
+    game = GameActive.objects.filter(gameuser_id2=game_user)
+    if len(game) == 1:
+        result = f'game{game[0].game_name[-1]}player2'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'name' : game[0].gameuser_id2.screen_name,
+                'score' : game[0].score2,
+                'damage' : game[0].damage2
+            }
+        elif action == "clear":
+            game[0].gameuser_id2 = None
+            game[0].status2 = 0
+            game[0].score2 = 0
+            game[0].damage2 = 0
+            game[0].save()
+
+    game = GameActive.objects.filter(gameuser_id3=game_user)
+    if len(game) == 1:
+        result = f'game{game[0].game_name[-1]}player3'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'name' : game[0].gameuser_id2.screen_name,
+                'score' : game[0].score3,
+                'damage' : game[0].damage3
+            }
+        elif action == "clear":
+            game[0].gameuser_id3 = None
+            game[0].status3 = 0
+            game[0].score3 = 0
+            game[0].damage3 = 0
+            game[0].save()
+
+    game = GameActive.objects.filter(gameuser_id4=game_user)
+    if len(game) == 1:
+        result = f'game{game[0].game_name[-1]}player4'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'name' : game[0].gameuser_id4.screen_name,
+                'score' : game[0].score4,
+                'damage' : game[0].damage4
+            }
+        elif action == "clear":
+            game[0].gameuser_id4 = None
+            game[0].status4 = 0
+            game[0].score4 = 0
+            game[0].damage4 = 0
+            game[0].save()
+
+    return result
+
+
 def gamesplayers(game="all"):
     if game == "all":
         games = GameActive.objects.all()
