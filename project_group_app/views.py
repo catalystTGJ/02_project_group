@@ -6,7 +6,8 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from .models import GameUser, GameActive, GameAsset, GameField, populateAssets, populateGameActive, populateGameField, populateTestUsers, gamesplayers, gamesplayersData
+from .models import GameUser, GameActive, GameAsset, GameField, gameplayerPath, gamesplayers, gamesplayersData
+from .models import populateAssets, populateGameActive, populateGameField, populateTestUsers
 import random
 import json
 
@@ -27,6 +28,12 @@ def signin(request):
 # sign-off buttion will flush session
 # it might be desirable to write some stuff for the user into the db, but i'm not sure we need this.
 def signout(request):
+
+    user_id = request.session['_auth_user_id']
+    user = User.objects.get(id=user_id)
+    gameuser = GameUser.objects.get(user=user)
+    gameplayerPath(gameuser, action="clear")
+
     request.session.flush()
     return redirect('/')
 
@@ -50,13 +57,14 @@ def game_play(request):
     user_id = request.session['_auth_user_id']
     user = User.objects.get(id=user_id)
     gameuser = GameUser.objects.get(user=user)
-    player_data = game_player_path(gameuser, action="dict")
+    player_data = gameplayerPath(gameuser, action="dict")
     game_num = player_data['path'][4:5]
     player_names = gamesplayers(game_num)
 
     context = {
         'game_user' : gameuser,
         'live_player' : player_data['path'],
+        'live_name' : player_data['name'],
         'live_score' : player_data['score'],
         'live_damage' : player_data['damage'],
         'game_player1' : f'game{game_num}player1',
@@ -72,7 +80,7 @@ def game_play(request):
     }
     return render(request, "game_play.html", context)
 
-# game selection will lead to game play
+# game dash will provide real-time results for the games/players.
 # notice there is a 'require login' decorator here to send back to sign-in registration.
 @login_required(login_url='/signin')
 def game_dash(request):
@@ -88,19 +96,22 @@ def game_dash(request):
 def game_rank(request):
     return render(request, "game_rank.html")
 
-def games_players_request(request):
-    print('games_players_request')
+@login_required(login_url='/signin')
+def games_players_names_json(request):
     list = gamesplayers()
     return HttpResponse(json.dumps(list))
 
-def games_players_stats(request):
+@login_required(login_url='/signin')
+def games_players_stats_json(request):
     list = gamesplayersData()
     return HttpResponse(json.dumps(list))
 
-def game_player_update(request):
+@login_required(login_url='/signin')
+def game_player_update_json(request):
     result = "nope!"
     if request.method == "POST":
         json_items = json.load(request)
+        player_name = json_items['n']
         game_number = int(json_items['g'])
         player_number = int(json_items['p'])
         player_score = int(json_items['s'])
@@ -113,81 +124,29 @@ def game_player_update(request):
                 game[0].score1 = player_score
                 game[0].damage1 = player_damage
                 game[0].status1 = player_status
+                game[0].gameuser_id1.screen_name = player_name
             if player_number == 2:
                 game[0].score2 = player_score
                 game[0].damage2 = player_damage
                 game[0].status2 = player_status
+                game[0].gameuser_id2.screen_name = player_name
             if player_number == 3:
                 game[0].score3 = player_score
                 game[0].damage3 = player_damage
                 game[0].status3 = player_status
+                game[0].gameuser_id3.screen_name = player_name
             if player_number == 4:
                 game[0].score4 = player_score
                 game[0].damage4 = player_damage
                 game[0].status4 = player_status
+                game[0].gameuser_id4.screen_name = player_name
             game[0].save()
         result= "done"
 
     return HttpResponse(json.dumps(result))
 
-def game_player_path(game_user, action=''):
-    result = ""
-
-    game = GameActive.objects.filter(gameuser_id1=game_user)
-    if len(game) == 1:
-        result = f'game{game[0].game_name[-1]}player1'
-        if action == "dict":
-            result = {
-                'path' : result,
-                'score' : game[0].score1,
-                'damage' : game[0].damage1
-            }
-        elif action == "clear":
-            game[0].gameuser_id1 = None
-            game[0].save()
-
-    game = GameActive.objects.filter(gameuser_id2=game_user)
-    if len(game) == 1:
-        result = f'game{game[0].game_name[-1]}player2'
-        if action == "dict":
-            result = {
-                'path' : result,
-                'score' : game[0].score2,
-                'damage' : game[0].damage2
-            }
-        elif action == "clear":
-            game[0].gameuser_id2 = None
-            game[0].save()
-
-    game = GameActive.objects.filter(gameuser_id3=game_user)
-    if len(game) == 1:
-        result = f'game{game[0].game_name[-1]}player3'
-        if action == "dict":
-            result = {
-                'path' : result,
-                'score' : game[0].score3,
-                'damage' : game[0].damage3
-            }
-        elif action == "clear":
-            game[0].gameuser_id3 = None
-            game[0].save()
-
-    game = GameActive.objects.filter(gameuser_id4=game_user)
-    if len(game) == 1:
-        result = f'game{game[0].game_name[-1]}player4'
-        if action == "dict":
-            result = {
-                'path' : result,
-                'score' : game[0].score4,
-                'damage' : game[0].damage4
-            }
-        elif action == "clear":
-            game[0].gameuser_id4 = None
-            game[0].save()
-
-    return result
-
-def game_player_select(request):
+@login_required(login_url='/signin')
+def game_player_select_json(request):
     result = "nope!"
     if request.method == "POST":
         json_items = json.load(request)
@@ -198,7 +157,7 @@ def game_player_select(request):
         user = User.objects.get(id=user_id)
         game_user = GameUser.objects.get(user=user)
 
-        game_player_path(game_user, action="clear")
+        gameplayerPath(game_user, action="clear")
 
         game = GameActive.objects.filter(game_name=game_name)
         if len(game) == 1:
@@ -216,27 +175,40 @@ def game_player_select(request):
                 game[0].gameuser_id4 = game_user
                 result = game[0].save()
 
-        result = game_player_path(game_user, action="path")
+        result = gameplayerPath(game_user, action="path")
 
     return HttpResponse(json.dumps(result))
 
+@login_required(login_url='/signin')
 def games_players_clear(request):
     games = GameActive.objects.all()
     for game in games:
         game.gameuser_id1 = None
+        game.status1 = 0
+        game.score1 = 0
+        game.damage1 = 0
         game.gameuser_id2 = None
+        game.status2 = 0
+        game.score2 = 0
+        game.damage2 = 0
         game.gameuser_id3 = None
+        game.status3 = 0
+        game.score3 = 0
+        game.damage3 = 0
         game.gameuser_id4 = None
+        game.status4 = 0
+        game.score4 = 0
+        game.damage4 = 0
         game.save()
     return redirect (f'/games-players-request')
 
+@login_required(login_url='/signin')
 def game_field_generate(request, game_number):
     populateGameField(game_number)
     return redirect (f'/game-play')
-    # return redirect (f'/game-field-request/{game_number}')
 
+@login_required(login_url='/signin')
 def game_field_request(request, game_number):
-
     game = GameActive.objects.filter(game_name=f'Game {game_number}')
     field_objects = GameField.objects.filter(gameactive=game[0])
     list = []
@@ -259,12 +231,14 @@ def game_field_request(request, game_number):
 
     return HttpResponse(json.dumps(list))
 
+@login_required(login_url='/signin')
 def utility(request):
     #populateAssets()
     #populateGameActive()
     populateTestUsers()
     return redirect ("/game-pick")
 
+@login_required(login_url='/signin')
 def testpost(request):
     if request.method == "GET":
         return render(request, "utility.html")
@@ -273,15 +247,3 @@ def testpost(request):
         stuff = json.load(request)
         print(stuff['game_number'])
         return HttpResponse("done")
-
-
-
-
-# def game_chat(request):
-#     context = {
-#         'game_player1' : 'game1player1',
-#         'game_player2' : 'game1player2',
-#         'game_player3' : 'game1player3',
-#         'game_player4' : 'game1player4',
-#     }
-#     return render(request, 'ZZ_games_chat.html', context)
