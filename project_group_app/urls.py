@@ -12,6 +12,7 @@ urlpatterns = [
     path('game-rank', views.game_rank),
     path('games-players-clear', views.games_players_clear),
     path('game-player-select', views.game_player_select),
+    path('game-player-update', views.game_player_update),
     path('games-players-request', views.games_players_request),
     path('games-players-stats', views.games_players_stats),
     path('utility', views.utility),

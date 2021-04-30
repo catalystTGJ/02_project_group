@@ -91,8 +91,11 @@ class GameField(models.Model):
     y_coord = models.IntegerField()
     transform = models.IntegerField()
 
-def gamesplayers():
-    games = GameActive.objects.all()
+def gamesplayers(game="all"):
+    if game == "all":
+        games = GameActive.objects.all()
+    else:
+        games = GameActive.objects.filter(game_name=f'Game {game}')
     list = []
     for game in games:
         if game.gameuser_id1 is None:
