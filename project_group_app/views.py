@@ -125,21 +125,25 @@ def game_player_update_json(request):
                 game[0].damage1 = player_damage
                 game[0].status1 = player_status
                 game[0].gameuser_id1.screen_name = player_name
+                game[0].gameuser_id1.save()
             if player_number == 2:
                 game[0].score2 = player_score
                 game[0].damage2 = player_damage
                 game[0].status2 = player_status
                 game[0].gameuser_id2.screen_name = player_name
+                game[0].gameuser_id2.save()
             if player_number == 3:
                 game[0].score3 = player_score
                 game[0].damage3 = player_damage
                 game[0].status3 = player_status
                 game[0].gameuser_id3.screen_name = player_name
+                game[0].gameuser_id3.save()
             if player_number == 4:
                 game[0].score4 = player_score
                 game[0].damage4 = player_damage
                 game[0].status4 = player_status
                 game[0].gameuser_id4.screen_name = player_name
+                game[0].gameuser_id4.save()
             game[0].save()
         result= "done"
 

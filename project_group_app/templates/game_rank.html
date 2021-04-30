@@ -7,7 +7,7 @@
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         {% load static %}
-        <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+        <link rel="stylesheet" href="{% static 'css/game_rank.css' %}?{% now 'U' %}">
         <script src="{% static 'js/game_rank.js' %}"></script>
     </head>
     <body>
@@ -27,6 +27,12 @@
 
             <hr>
 
+        </div>
+
+        <div id="game-message-overlay" class="container-fluid countdown">
+            <div class="col-12 text-center">
+                <h1 id="game-count-down" class="display-3 bg-dark text-white">:: UNDER CONSTRUCTION ::</h1>
+            </div>
         </div>
 
     </body>

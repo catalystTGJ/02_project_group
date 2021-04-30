@@ -83,9 +83,8 @@ hr.solid {
 }
 
 .countdown {
-    position : absolute;
     width : 1400px;
-    height : 100px;
-    top : 301px;
+    height : 200px;
+    margin-top : 160px;
     left : 0px;
 }
