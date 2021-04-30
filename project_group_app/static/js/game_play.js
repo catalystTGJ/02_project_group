@@ -5,7 +5,9 @@ var tank_controls = true;
 var chat_target = 5;
 
 var live_player = ""
-var live_number = "0"
+var live_player_number = "0"
+var live_game_number = "0"
+var gameuser_score = 0
 var ball_index = 0
 
 var repair_image = 'statis/images/reapir/repair_01.png'
@@ -22,7 +24,7 @@ var wh = window.innerHeight;
 
 var tank_image_index = 1;
 
-//delay between updates
+//delay between game loop cycles
 var msdelay = 25;
 // scale of the tanks/objects
 var scale = .2;
@@ -411,6 +413,7 @@ function ballisticsRender() {
             if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank1, tank.half - 10, tank.x_center, tank.y_center) == 1) {
                 tank1.d+=500;
                 old_list[i].c = 0;
+
             }
 
             if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank2, tank.half - 10, tank.x_center, tank.y_center) == 1) {
@@ -428,14 +431,18 @@ function ballisticsRender() {
                 old_list[i].c = 0;
             }
 
+            // if (old_list[i].c == 0 && old_list[i].o == gameuser_id) {
+            //     gameuser_score++
+            // }
+
             for (oi=0; oi<obj_list.length; oi++) {
                 if (obj_list[oi].k == 'trees') {
-                    if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                    if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 22, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
                         obj_list[oi].d+=500;
                         old_list[i].c = 0;
                     }
                 } else {
-                    if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 25, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
+                    if (collisionCheck(old_list[i].x, old_list[i].y, 5, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4) - 22, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
                         obj_list[oi].d+=500;
                         old_list[i].c = 0;
                     }
@@ -481,8 +488,6 @@ function objectsRender() {
     }
 }
 
-
-
 function gameplayer1send(data) {
     gameplayer1Socket.send(JSON.stringify(data));
 }
@@ -513,9 +518,9 @@ function BallSender(ball) {
 
 function gamefieldRequest() {
     if (!gamefield_ready) {
-        if (Math.trunc(game_cycle/100) == game_cycle/100) {
-
-            var url = 'http://' + window.location.host + '/game-field-request/1';
+        if (loopcycleCheck(100)) {
+            console.log("maybe?")
+            var url = 'http://' + window.location.host + '/game-field-request/' + live_game_number;
             const xmltreesRequest = new XMLHttpRequest();
             xmltreesRequest.open("GET", url, true);
             xmltreesRequest.send();
@@ -526,6 +531,7 @@ function gamefieldRequest() {
                     for (var oi=0; oi < data_list.length; oi++) {
                         obj_list.push(data_list[oi]);
                     }
+                    console.log("here.")
                     gamefield_ready = true;
                 }
             };
@@ -535,12 +541,12 @@ function gamefieldRequest() {
 
 function tankRender() {
     var update_others = true;
-    if (Math.trunc(game_cycle/10) == game_cycle/10) {
+    if (loopcycleCheck(10)) {
         var send = true;
     } else {
         var send = false;
     }
-    if (live_number == "1") {
+    if (live_player_number == "1") {
         live_tank.c++;
         updateTank(tank1, true);
         if (send) {gameplayer1send(live_tank)}
@@ -549,7 +555,7 @@ function tankRender() {
         updateTank(tank1, update_others)
     }
     
-    if (live_number == "2") {
+    if (live_player_number == "2") {
         live_tank.c++;
         updateTank(tank2, true);
         if (send) {gameplayer2send(live_tank)}
@@ -558,7 +564,7 @@ function tankRender() {
         updateTank(tank2, update_others)
     }
     
-    if (live_number == "3") {
+    if (live_player_number == "3") {
         live_tank.c++;
         updateTank(tank3, true);
         if (send) {gameplayer3send(live_tank)}
@@ -567,7 +573,7 @@ function tankRender() {
         updateTank(tank3, update_others)
     }
     
-    if (live_number == "4") {
+    if (live_player_number == "4") {
         live_tank.c++;
         updateTank(tank4, true);
         if (send) {gameplayer4send(live_tank)}
@@ -589,14 +595,36 @@ function changeConsole() {
     document.getElementById("console").className = console_class;
 }
 
+function uploadgameuserStats() {
+    if (loopcycleCheck(600)) {
+        if (html_ready) {
+            if (live_tank != {}) {
+                var gameuserstatsPost = new XMLHttpRequest();
+                gameuserstatsPost.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        console.log(this.responseText)
+                    }
+                }
+                gameuserstatsPost.open("POST", "/game-user-stats", true);
+                gameuserstatsPost.setRequestHeader('X-CSRFToken', csrf_token);
+                gameuserstatsPost.send(JSON.stringify({'gameuser_id' : gameuser_id, 'gameuser_score' : gameuser_score, 'gameuser_damage' : live_tank_d}));
+            }
+        }
+    }
+}
+
+function loopcycleCheck(value) {
+    return (Math.trunc(loop_cycles/value) == loop_cycles/value) ? true : false
+}
+
 function gameLoop(){
     if (html_ready) {
-        game_cycle++;
-        document.querySelector('#cycles').value = (game_cycle);
+        loop_cycles++;
+        document.querySelector('#cycles').value = (loop_cycles);
 
         changeConsole();
         gamefieldRequest();
-        if (Math.trunc(game_cycle/50) == game_cycle/50) {
+        if (loopcycleCheck(50)) {
             checkObjectsHTML();
             objectsRender();
         }
@@ -620,7 +648,8 @@ document.onkeydown = function(e){
                         c : 180,
                         s : 20,
                         t : live_tank.t_t,
-                        to : tank.to_chassis
+                        to : tank.to_chassis,
+                        //o : gameuser_id
                     }
 
                     new_ball.runrise = degreestoRunRise(new_ball.t)
@@ -735,15 +764,20 @@ document.onkeyup = function(e){
 // that will allow all the asyncronous sections of the code to do work.
 window.addEventListener("load", function() {
 
-    live_player = document.getElementById('live-player').textContent;
-    live_number = live_player.charAt(live_player.length - 1);
-    if (live_number == "1") {
+    // gameuser_id = document.getElementById("user-id").innerHTML
+    // gameuser_score = document.getElementById("score").innerHTML
+    screen_name = document.getElementById("user-screen-name").innerHTML;
+    live_player = document.getElementById('live-player').innerHTML;
+    live_player_number = live_player.charAt(live_player.length - 1);
+    live_game_number = live_player.charAt(4);
+
+    if (live_player_number == "1") {
         live_tank = tank1
-    } else if (live_number == "2") {
+    } else if (live_player_number == "2") {
         live_tank = tank2
-    } else if (live_number == "3") {
+    } else if (live_player_number == "3") {
         live_tank = tank3
-    } else if (live_number == "4") {
+    } else if (live_player_number == "4") {
         live_tank = tank4
     } else {
         live_tank = {}
@@ -861,7 +895,7 @@ window.addEventListener("load", function() {
         }
         if (dict.k == 'chat') {
             chat_number = dict.n.charAt(dict.n.length - 1);
-            if (live_number == chat_number || chat_number == 5) {
+            if (live_player_number == chat_number || chat_number == 5) {
                 curr_text = document.querySelector('#game-common-log').value
                 document.querySelector('#game-common-log').value = (dict.m) + '\n' + curr_text
             } 
@@ -889,7 +923,7 @@ window.addEventListener("load", function() {
         console.error('game metrics socket closed unexpectedly');
     };
 
-    game_cycle = 0;
+    loop_cycles = 0;
     tank1_recv = 0;
     tank2_recv = 0;
     tank3_recv = 0;

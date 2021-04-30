@@ -10,7 +10,7 @@
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
-    <script src="{% static 'js/game_dash.js' %}"></script>
+    <script src="{% static 'js/game_dash.js' %}?{% now 'U' %}"></script>
 </head>
 
 <body>
@@ -19,7 +19,12 @@
             <div class="col-4 my-auto">
                 <h2>Dash</h2>
             </div>
-            <div class="col-8 my-auto text-right">
+            <div class="col-4 my-auto">
+                <p id="user-id" hidden>{{user.id}}</p>
+                <p id="user-screen-name" hidden>{{user.gameuser.screen_name}}</p>
+                <h2>{{user.gameuser.screen_name}}</h2>
+            </div>
+            <div class="col-4 my-auto text-right">
                 <a class="btn btn-light btn-sm" href="/game-pick">Select</a>
                 <a class="btn btn-dark btn-sm" href="/game-dash">Dash</a>
                 <a class="btn btn-light btn-sm" href="/game-rank">Metrics</a>
@@ -33,7 +38,7 @@
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Game</th>
-                    <th scope="col">Player 1 {{ gameActive.gameUser_id }}</th>
+                    <th scope="col">Player 1</th>
                     <th scope="col">Player 2</th>
                     <th scope="col">Player 3</th>
                     <th scope="col">Player 4</th>
@@ -41,28 +46,32 @@
             </thead>
             <tbody>
                 <tr>
-                    <th scope="row">1 {{gameActive.gameName }}</th>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <th scope="row">Game 1</th>
+                    <td id="game-1-player-1"></td>
+                    <td id="game-1-player-2"></td>
+                    <td id="game-1-player-3"></td>
+                    <td id="game-1-player-4"></td>
                 </tr>
                 <tr>
-                    <th scope="row">2 {{gameActive.gameName }}</th>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <th scope="row">Game 2</th>
+                    <td id="game-2-player-1"></td>
+                    <td id="game-2-player-2"></td>
+                    <td id="game-2-player-3"></td>
+                    <td id="game-2-player-4"></td>
                 </tr>
                 <tr>
-                    <th scope="row">3 {{gameActive.gameName }}</th>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <th scope="row">Game 3</th>
+                    <td id="game-3-player-1"></td>
+                    <td id="game-3-player-2"></td>
+                    <td id="game-3-player-3"></td>
+                    <td id="game-3-player-4"></td>
                 </tr>
                 <tr>
-                    <th scope="row">4 {{gameActive.gameName }}</th>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
-                    <td>Name and score{{ gameUser.screen_name }} {{ gameUser.high_score }}</td>
+                    <th scope="row">Game 4</th>
+                    <td id="game-4-player-1"></td>
+                    <td id="game-4-player-2"></td>
+                    <td id="game-4-player-3"></td>
+                    <td id="game-4-player-4"></td>
                 </tr>
             </tbody>
         </table>

@@ -80,7 +80,11 @@
                 <div class="col-12 text-center"><p>Controls are: Turret - left:[F] Right:[J] Fire:[G] Stop: [H] --- Steering: left:[D] right: [K] --- Drive - forward; [S] backward: [L] --- Drive-Steer Stop: [A] --- Controls Toggle: [Semicolon]</p></div>
             </div>
             <div class="row center">
-                <div class="col-4"></div>
+                <div class="col-4 my-auto">
+                    <p id="user-id" hidden>{{gameuser.id}}</p>
+                    <p id="user-screen-name" hidden>{{gameuser.screen_name}}</p>
+                    <h2>{{gameuser.screen_name}}</h2>
+                </div>
                 <div class="col-4 text-center"><textarea id="chat-input" cols="40" rows="1"></textarea></div>
                 <div class="col-4 text-center" ><textarea id="cycles" cols="10" rows="1"></textarea></div>
             </div>
