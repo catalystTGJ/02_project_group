@@ -1,14 +1,20 @@
 // boolean to know when its safe to work with the DOM.
 var html_ready = false;
+// boolean to know when its time to launch the game.
+var launch_ready = false;
 // delay in milliseconds.
-var msdelay = 250;
+var msdelay = 25;
+// initial value for how often to check for player changes
+var gamesplayers_cycles = 10;
 // counter to know how much time has gone by since execution.
-var main_loop_cycle = 0;
+var loop_cycles = 0;
 // boolean to determine the state of the buttons.
+
 var buttons_enabled = true;
 
 var game_num = ""
 var player_num = ""
+var game_player = ""
 
 function disableButtons() {
     if (html_ready && buttons_enabled){
@@ -24,7 +30,7 @@ function disableButtons() {
 
 function gamesplayersCheck() {
     if (html_ready) {
-        if (Math.trunc(main_loop_cycle/10) == main_loop_cycle/10) {
+        if (loopcycleCheck(gamesplayers_cycles)) {
 
             var url = 'http://' + window.location.host + '/games-players-request';
             const gamesplayersRequest = new XMLHttpRequest();
@@ -35,16 +41,54 @@ function gamesplayersCheck() {
                 if (this.readyState == 4 && this.status == 200) {
                     const data_list = JSON.parse(this.responseText);
                     for (var i=0; i<4; i++) {
+                        var selected_players = 0;
                         for (var player=1; player<5; player++) {
                             if (data_list[i][player] != "") {
                                 document.getElementById("button-" + (i + 1) + '-' + player).innerHTML = data_list[i][player];
                                 document.getElementById("button-" + (i + 1) + '-' + player).disabled = true;
+
+                                selected_players++;
+                                console.log((i+1) + " " + selected_players)
+                                if (selected_players==4 && game_player.charAt(5)==(i+1)) {
+                                    if (!launch_ready) {
+                                        disableButtons();
+                                        launch_ready = true;
+                                        launch_countdown = 10;
+                                        if (game_player.charAt(12)==1) {launch_countdown-=2;}
+                                    }
+                                }
+
                             } else {
                                 document.getElementById("button-" + (i + 1) + '-' + player).innerHTML = 'Player ' + [player];
                                 document.getElementById("button-" + (i + 1) + '-' + player).disabled = false;
                             }
                         }
                     }
+                    gamesplayers_cycles = 120
+                }
+            }
+        }
+    }
+}
+
+function launchmessage() {
+    if (launch_ready) {
+        document.getElementById("launch-ready").innerHTML = "Game will launch in: " + launch_countdown + " Seconds"
+    } else {
+        document.getElementById("launch-ready").innerHTML = "Select a Game/Player button"
+    }
+}
+
+function launchgame() {
+    if (launch_ready) {
+        if (loopcycleCheck(40)) {
+            launchmessage()
+            launch_countdown--;
+            if (launch_countdown < 0) {
+                if (game_player.charAt(12) == "1") {
+                    window.location.pathname = '/game-field-generate/' + game_player.charAt(5);
+                } else {
+                    window.location.pathname = '/game-play';
                 }
             }
         }
@@ -56,7 +100,8 @@ function gameplayerselect() {
         var gamesplayerPost = new XMLHttpRequest();
         gamesplayerPost.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                console.log(this.responseText)
+                game_player = this.responseText
+                console.log(game_player)
             }
         };
         gamesplayerPost.open("POST", "/game-player-select", true);
@@ -65,13 +110,18 @@ function gameplayerselect() {
     }
 }
 
+function loopcycleCheck(value) {
+    return (Math.trunc(loop_cycles/value) == loop_cycles/value) ? true : false
+}
+
 // This is the main loop.
 // When nothing else is happening.
 // This is where to put things that should be updated on some frequency.
 function mainLoop(){
     if (html_ready) {
-        main_loop_cycle++;
+        loop_cycles++;
         gamesplayersCheck();
+        launchgame();
         // disableButtons();
     }
 }
@@ -97,8 +147,11 @@ document.onkeyup = function(e){
 // the very last step in this section will set a boolean variable,
 // that will allow all the asyncronous sections of the code to do work.
 window.addEventListener("load", function() {
+
     csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    current_user_id = document.getElementById("user-id").innerHTML
+    current_user_id = document.getElementById("user-id").textContent
+    screen_name = document.getElementById("user-screen-name").textContent;
+
 
     let btns = document.querySelectorAll('button');
     for (a_button of btns) {
@@ -108,8 +161,14 @@ window.addEventListener("load", function() {
                 player_num = this.id.substring(9,10)
                 gameplayerselect();
             }
+            if (this.id.startsWith("confirm")) {
+                if (game_player != "") {
+                    launchgame()
+                }
+            }
         });
     }
+
     html_ready = true;
 });
 

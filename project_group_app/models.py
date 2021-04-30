@@ -91,6 +91,102 @@ class GameField(models.Model):
     y_coord = models.IntegerField()
     transform = models.IntegerField()
 
+def gamesplayers():
+    games = GameActive.objects.all()
+    list = []
+    for game in games:
+        if game.gameuser_id1 is None:
+            screen_name1 = ""
+        else:
+            screen_name1 = game.gameuser_id1.screen_name
+
+        if game.gameuser_id2 is None:
+            screen_name2 = ""
+        else:
+            screen_name2 = game.gameuser_id2.screen_name
+
+        if game.gameuser_id3 is None:
+            screen_name3 = ""
+        else:
+            screen_name3 = game.gameuser_id3.screen_name
+
+        if game.gameuser_id4 is None:
+            screen_name4 = ""
+        else:
+            screen_name4 = game.gameuser_id4.screen_name
+        list.append(
+            {
+                '1' : screen_name1,
+                '2' : screen_name2,
+                '3' : screen_name3,
+                '4' : screen_name4
+            }
+        )
+
+    return list
+
+def gamesplayersData():
+    games_list = []
+    games = GameActive.objects.all()
+    for game in games:
+
+        if game.gameuser_id1 is None:
+            gameuser_id1 = ""
+            screen_name1 = ""
+        else:
+            gameuser_id1 = game.gameuser_id1.id
+            screen_name1 = game.gameuser_id1.screen_name
+
+        if game.gameuser_id2 is None:
+            gameuser_id2 = ""
+            screen_name2 = ""
+        else:
+            gameuser_id2 = game.gameuser_id2.id
+            screen_name2 = game.gameuser_id2.screen_name
+
+        if game.gameuser_id3 is None:
+            gameuser_id3 = ""
+            screen_name3 = ""
+        else:
+            gameuser_id3 = game.gameuser_id3.id
+            screen_name3 = game.gameuser_id3.screen_name
+
+        if game.gameuser_id4 is None:
+            gameuser_id4 = ""
+            screen_name4 = ""
+        else:
+            gameuser_id4 = game.gameuser_id4.id
+            screen_name4 = game.gameuser_id4.screen_name
+
+        games_list.append({game.game_name : [{
+            'gameuser_id' : gameuser_id1,
+            'screen_name' : screen_name1,
+            'score' : game.score1,
+            'damage' : game.damage1,
+            'status' : game.status1
+            },{
+            'gameuser_id' : gameuser_id2,
+            'screen_name' : screen_name2,
+            'score' : game.score2,
+            'damage' : game.damage2,
+            'status' : game.status2
+            },{
+            'gameuser_id' : gameuser_id3,
+            'screen_name' : screen_name3,
+            'score' : game.score3,
+            'damage' : game.damage3,
+            'status' : game.status3
+            },{
+            'gameuser_id' : gameuser_id4,
+            'screen_name' : screen_name4,
+            'score' : game.score4,
+            'damage' : game.damage4,
+            'status' : game.status4
+            }]})
+
+    return games_list
+
+
 def populateTestUsers():
     # create test user accounts if they are needed
     user_list = ['testplayer1','testplayer2','testplayer3','testplayer4','testplayer5','testplayer6','testplayer7','testplayer8']
@@ -243,7 +339,7 @@ def populateGameField(game_number):
 
     # populates other items
     objects = GameAsset.objects.filter(type='objects')
-    for t in range(random.randint(10, 20)):
+    for t in range(random.randint(7, 15)):
             
         objects_index = random.randint(0, len(objects)-1)
         w = objects[objects_index].width
@@ -285,7 +381,7 @@ def populateGameField(game_number):
 
     # populates the trees
     objects = GameAsset.objects.filter(type='trees')
-    for t in range(random.randint(30, 100)):
+    for t in range(random.randint(20, 70)):
         
         objects_index = random.randint(0, len(objects)-1)
         w = objects[objects_index].width
