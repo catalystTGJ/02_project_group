@@ -4,19 +4,26 @@ var player_ready = false;
 var tank_controls = true;
 var chat_target = 5;
 
-var live_player = ""
-var live_player_number = "0"
-var live_game_number = "0"
-var gameuser_score = 0
-var ball_index = 0
+var live_player = "";
+var live_player_number = "0";
+var live_player_game = "0";
+var gameuser_score = 0;
+var gameuser_status = "1";
+var gameuser_damage = 0;
+var ball_index = 0;
 
-var repair_image = 'statis/images/reapir/repair_01.png'
-var bullet_image = '/static/images/bullets/bullet_1.png'
-var turret_image = '/static/images/tanks/tank_01_turret_1.png'
-var chassis_image = '/static/images/tanks/tank_01_chassis_1.png'
+var repair_image = 'static/images/reapir/repair_01.png';
+var bullet_image = '/static/images/bullets/bullet_1.png';
+var turret_image = '/static/images/tanks/tank_01_turret_1.png';
+var chassis_image = '/static/images/tanks/tank_01_chassis_1.png';
+var canon_mp3 = '/static/audio/canon.mp3';
+var explosion_mp3 = '/static/audio/explosion.mp3';
 
-var turret_image_prefix = '/static/images/tanks/tank_01_turret_'
-var chassis_image_prefix = '/static/images/tanks/tank_01_chassis_'
+var canon_sound;
+var explosion_sound;
+
+var turret_image_prefix = '/static/images/tanks/tank_01_turret_';
+var chassis_image_prefix = '/static/images/tanks/tank_01_chassis_';
 
 //determine window size - this is not currently in use
 var ww = window.innerWidth;
@@ -151,6 +158,21 @@ var tank4 = {
     r_t: 0,
     s: 0,
     runrise: {'x' : 0, 'y' : 0}
+}
+
+function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }    
 }
 
 function existsElement(element_id) {
@@ -306,13 +328,13 @@ function updateTank(tank_dict, local) {
                 if (obj_list[oi].k == 'trees') {
                     if (collisionCheck(adj_x, adj_y, tank.half, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4)-35, Math.round((obj_list[oi].w)/2), Math.round((obj_list[oi].h)/2)) == 1) {
                         obj_list[oi].d+=5;
-                        tank_dict.d+=obj_list[oi].p/(1000/msdelay);
+                        tank_dict.d+=obj_list[oi].p;
                         if (tot_r < obj_list[oi].r) {tot_r = obj_list[oi].r}
                     }
                 } else {
                     if (collisionCheck(adj_x, adj_y, tank.half, obj_list[oi], Math.round((obj_list[oi].w + obj_list[oi].h) / 4)-35, Math.round(obj_list[oi].w/2), Math.round(obj_list[oi].h/2)) == 1) {
                         obj_list[oi].d+=5;
-                        tank_dict.d+=obj_list[oi].p/(1000/msdelay);
+                        tank_dict.d+=obj_list[oi].p;
                         if (tot_r < obj_list[oi].r) {tot_r = obj_list[oi].r}
                     }
                 }
@@ -355,29 +377,29 @@ function updateTank(tank_dict, local) {
     tank_image_index = damage_adjust < 11 ? damage_adjust : 11;
 
     //update chassis
-    document.getElementById(tank_dict.n + '-chassis').width = tank.w_chassis; //remove tank_dict.t
-    document.getElementById(tank_dict.n + '-chassis').height = tank.h_chassis; //remove tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis').width = tank.w_chassis;
+    document.getElementById(tank_dict.n + '-chassis').height = tank.h_chassis;
 
     document.getElementById(tank_dict.n + '-chassis').src = chassis_image_prefix + tank_image_index + '.png';
 
     document.getElementById(tank_dict.n + '-chassis-container').style.position = "absolute";
     document.getElementById(tank_dict.n + '-chassis-container').style.top = tank_dict.y + 'px';
-    document.getElementById(tank_dict.n + '-chassis-container').style.left = tank_dict.x + tank.left_off + 'px'; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis-container').style.left = tank_dict.x + tank.left_off + 'px';
     document.getElementById(tank_dict.n + '-chassis-container').style.transform = 'rotate(' + tank_dict.t_c + 'deg)';
-    document.getElementById(tank_dict.n + '-chassis-container').style.transformOrigin = tank.to_chassis + "%"; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-chassis-container').style.transformOrigin = tank.to_chassis + "%";
     document.getElementById(tank_dict.n + '-chassis-container').style.filter = 'hue-rotate(' + tank_dict.color + 'deg)';  // invert(' + tank_dict.d / 5000 + ')';
 
     //update turret
-    document.getElementById(tank_dict.n + '-turret').width = tank.w_turret; //removed tank_dict.t
-    document.getElementById(tank_dict.n + '-turret').height = tank.h_turret; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret').width = tank.w_turret;
+    document.getElementById(tank_dict.n + '-turret').height = tank.h_turret;
 
     document.getElementById(tank_dict.n + '-turret').src = turret_image_prefix + tank_image_index + '.png';
 
     document.getElementById(tank_dict.n + '-turret-container').style.position = "absolute";
-    document.getElementById(tank_dict.n + '-turret-container').style.top = tank_dict.y + tank.top_off + 'px'; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret-container').style.top = tank_dict.y + tank.top_off + 'px';
     document.getElementById(tank_dict.n + '-turret-container').style.left = tank_dict.x + 'px';
     document.getElementById(tank_dict.n + '-turret-container').style.transform = 'rotate(' + tank_dict.t_t + 'deg)';
-    document.getElementById(tank_dict.n + '-turret-container').style.transformOrigin = tank.to_turret + "%"; //removed tank_dict.t
+    document.getElementById(tank_dict.n + '-turret-container').style.transformOrigin = tank.to_turret + "%";
     document.getElementById(tank_dict.n + '-turret-container').style.filter = 'hue-rotate(' + (tank_dict.color + tank_dict.h) + 'deg)';
 
     //update tank data overlay
@@ -386,7 +408,6 @@ function updateTank(tank_dict, local) {
     document.getElementById(tank_dict.n + '-data').height = 50;
     document.getElementById(tank_dict.n + '-data').style.top = Math.trunc(tank_dict.y + 60) + 'px';
     document.getElementById(tank_dict.n + '-data').style.left = Math.trunc(tank_dict.x) + 'px';
-    // document.getElementById(tank_dict.n + '-data_1').innerHTML = "Tank X: " + Math.trunc(tank_dict.x * 100)/100 + " Y: " + Math.trunc(tank_dict.y * 100)/100;
     document.getElementById(tank_dict.n + '-heat-bar').value = tank_dict.h;
     document.getElementById(tank_dict.n + '-damage-bar').value = tank_dict.d;
 
@@ -413,7 +434,6 @@ function ballisticsRender() {
             if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank1, tank.half - 10, tank.x_center, tank.y_center) == 1) {
                 tank1.d+=500;
                 old_list[i].c = 0;
-
             }
 
             if (collisionCheck(old_list[i].x, old_list[i].y, 5, tank2, tank.half - 10, tank.x_center, tank.y_center) == 1) {
@@ -431,9 +451,10 @@ function ballisticsRender() {
                 old_list[i].c = 0;
             }
 
-            // if (old_list[i].c == 0 && old_list[i].o == gameuser_id) {
-            //     gameuser_score++
-            // }
+            if (old_list[i].c == 0) {
+                explosion_sound.play()
+                if (old_list[i].o == gameuser_id) {gameuser_score++}
+            }
 
             for (oi=0; oi<obj_list.length; oi++) {
                 if (obj_list[oi].k == 'trees') {
@@ -519,8 +540,7 @@ function BallSender(ball) {
 function gamefieldRequest() {
     if (!gamefield_ready) {
         if (loopcycleCheck(100)) {
-            console.log("maybe?")
-            var url = 'http://' + window.location.host + '/game-field-request/' + live_game_number;
+            var url = 'http://' + window.location.host + '/game-field-request/' + live_player_game;
             const xmltreesRequest = new XMLHttpRequest();
             xmltreesRequest.open("GET", url, true);
             xmltreesRequest.send();
@@ -531,7 +551,6 @@ function gamefieldRequest() {
                     for (var oi=0; oi < data_list.length; oi++) {
                         obj_list.push(data_list[oi]);
                     }
-                    console.log("here.")
                     gamefield_ready = true;
                 }
             };
@@ -541,6 +560,10 @@ function gamefieldRequest() {
 
 function tankRender() {
     var update_others = true;
+    document.getElementById(tank1.n + '-player-name').innerHTML = player1_name;
+    document.getElementById(tank2.n + '-player-name').innerHTML = player2_name;
+    document.getElementById(tank3.n + '-player-name').innerHTML = player3_name;
+    document.getElementById(tank4.n + '-player-name').innerHTML = player4_name;
     if (loopcycleCheck(10)) {
         var send = true;
     } else {
@@ -549,6 +572,7 @@ function tankRender() {
     if (live_player_number == "1") {
         live_tank.c++;
         updateTank(tank1, true);
+        
         if (send) {gameplayer1send(live_tank)}
     } else {
         if (tank1.c < tank1a.c) {tank1 = Object.assign(tank1, tank1a)}
@@ -558,6 +582,7 @@ function tankRender() {
     if (live_player_number == "2") {
         live_tank.c++;
         updateTank(tank2, true);
+        
         if (send) {gameplayer2send(live_tank)}
     } else {
         if (tank2.c < tank2a.c) {tank2 = Object.assign(tank2, tank2a)}
@@ -567,6 +592,7 @@ function tankRender() {
     if (live_player_number == "3") {
         live_tank.c++;
         updateTank(tank3, true);
+        
         if (send) {gameplayer3send(live_tank)}
     } else {
         if (tank3.c < tank3a.c) {tank3 = Object.assign(tank3, tank3a)}
@@ -576,6 +602,7 @@ function tankRender() {
     if (live_player_number == "4") {
         live_tank.c++;
         updateTank(tank4, true);
+        
         if (send) {gameplayer4send(live_tank)}
     } else {
         if (tank4.c < tank4a.c) {tank4 = Object.assign(tank4, tank4a)}
@@ -599,15 +626,26 @@ function uploadgameuserStats() {
     if (loopcycleCheck(600)) {
         if (html_ready) {
             if (live_tank != {}) {
+                if (live_tank.d >= 10000) {
+                    gameuser_status = "0";
+                    player_ready = false;
+                }
+                player_stats = {
+                    z : gameuser_status,
+                    g : live_player_game,
+                    p : live_player_number,
+                    s : gameuser_score,
+                    d : live_tank.d,
+                }
                 var gameuserstatsPost = new XMLHttpRequest();
                 gameuserstatsPost.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         console.log(this.responseText)
                     }
                 }
-                gameuserstatsPost.open("POST", "/game-user-stats", true);
+                gameuserstatsPost.open("POST", "/game-player-update", true);
                 gameuserstatsPost.setRequestHeader('X-CSRFToken', csrf_token);
-                gameuserstatsPost.send(JSON.stringify({'gameuser_id' : gameuser_id, 'gameuser_score' : gameuser_score, 'gameuser_damage' : live_tank_d}));
+                gameuserstatsPost.send(JSON.stringify(player_stats));
             }
         }
     }
@@ -631,6 +669,7 @@ function gameLoop(){
         checkCreateTanks();
         tankRender();
         ballisticsRender();
+        uploadgameuserStats();
     }
 }
 
@@ -649,7 +688,7 @@ document.onkeydown = function(e){
                         s : 20,
                         t : live_tank.t_t,
                         to : tank.to_chassis,
-                        //o : gameuser_id
+                        o : gameuser_id
                     }
 
                     new_ball.runrise = degreestoRunRise(new_ball.t)
@@ -763,13 +802,18 @@ document.onkeyup = function(e){
 // the very last step in this section will set a boolean variable,
 // that will allow all the asyncronous sections of the code to do work.
 window.addEventListener("load", function() {
-
-    // gameuser_id = document.getElementById("user-id").innerHTML
-    // gameuser_score = document.getElementById("score").innerHTML
+    csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    gameuser_id = Number(document.getElementById("user-id").innerHTML);
+    gameuser_score = Number(document.getElementById("live-score").innerHTML);
+    gameuser_damage = Number(document.getElementById("live-damage").innerHTML);
     screen_name = document.getElementById("user-screen-name").innerHTML;
     live_player = document.getElementById('live-player').innerHTML;
     live_player_number = live_player.charAt(live_player.length - 1);
-    live_game_number = live_player.charAt(4);
+    live_player_game = live_player.charAt(4);
+    player1_name = document.getElementById("game-player1-name").innerHTML;
+    player2_name = document.getElementById("game-player2-name").innerHTML;
+    player3_name = document.getElementById("game-player3-name").innerHTML;
+    player4_name = document.getElementById("game-player4-name").innerHTML;
 
     if (live_player_number == "1") {
         live_tank = tank1
@@ -782,6 +826,11 @@ window.addEventListener("load", function() {
     } else {
         live_tank = {}
     }
+
+    live_tank.d = gameuser_damage;
+
+    canon_sound = new sound (canon_mp3);
+    explosion_sound = new sound (explosion_mp3);
 
     tank1a = Object.assign(tank1, tank1);
     tank2a = Object.assign(tank2, tank2);
@@ -804,6 +853,8 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
+            
+            canon_sound.play();
             ball_list.push(dict);
         }
     }
@@ -828,6 +879,8 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
+            
+            canon_sound.play();
             ball_list.push(dict);
         }
     }
@@ -852,6 +905,8 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
+            
+            canon_sound.play();
             ball_list.push(dict);
         }
     }
@@ -876,6 +931,8 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
+            
+            canon_sound.play();
             ball_list.push(dict);
         }
     }
@@ -891,6 +948,8 @@ window.addEventListener("load", function() {
         const data = JSON.parse(e.data);
         const dict = JSON.parse(data);
         if (dict.k == 'ball') {
+            
+            canon_sound.play();
             ball_list.push(dict);
         }
         if (dict.k == 'chat') {

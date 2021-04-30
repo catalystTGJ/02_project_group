@@ -50,17 +50,23 @@ def game_play(request):
     user_id = request.session['_auth_user_id']
     user = User.objects.get(id=user_id)
     gameuser = GameUser.objects.get(user=user)
-    player = game_player_path(gameuser, action="path")
-    game_num = player[4:5]
-    print(f'test: {player}')
+    player_data = game_player_path(gameuser, action="dict")
+    game_num = player_data['path'][4:5]
+    player_names = gamesplayers(game_num)
 
     context = {
         'game_user' : gameuser,
-        'live_player' : player,
+        'live_player' : player_data['path'],
+        'live_score' : player_data['score'],
+        'live_damage' : player_data['damage'],
         'game_player1' : f'game{game_num}player1',
         'game_player2' : f'game{game_num}player2',
         'game_player3' : f'game{game_num}player3',
         'game_player4' : f'game{game_num}player4',
+        'game_player1_name' : player_names[0]['1'],
+        'game_player2_name' : player_names[0]['2'],
+        'game_player3_name' : player_names[0]['3'],
+        'game_player4_name' : player_names[0]['4'],
         'game_common' : f'game{game_num}common',
         'game_metrics' : 'gamemetrics'
     }
@@ -95,7 +101,7 @@ def game_player_update(request):
     result = "nope!"
     if request.method == "POST":
         json_items = json.load(request)
-        game_number = json_items['g']
+        game_number = int(json_items['g'])
         player_number = int(json_items['p'])
         player_score = int(json_items['s'])
         player_damage = int(json_items['d'])
@@ -104,20 +110,20 @@ def game_player_update(request):
         game = GameActive.objects.filter(game_name=f'Game {game_number}')
         if len(game) == 1:
             if player_number == 1:
-                game[0].score1 = player_score,
-                game[0].damage1 = player_damage,
+                game[0].score1 = player_score
+                game[0].damage1 = player_damage
                 game[0].status1 = player_status
             if player_number == 2:
-                game[0].score2 = player_score,
-                game[0].damage2 = player_damage,
+                game[0].score2 = player_score
+                game[0].damage2 = player_damage
                 game[0].status2 = player_status
             if player_number == 3:
-                game[0].score3 = player_score,
-                game[0].damage3 = player_damage,
+                game[0].score3 = player_score
+                game[0].damage3 = player_damage
                 game[0].status3 = player_status
             if player_number == 4:
-                game[0].score4 = player_score,
-                game[0].damage4 = player_damage,
+                game[0].score4 = player_score
+                game[0].damage4 = player_damage
                 game[0].status4 = player_status
             game[0].save()
         result= "done"
@@ -125,41 +131,61 @@ def game_player_update(request):
     return HttpResponse(json.dumps(result))
 
 def game_player_path(game_user, action=''):
-    path = ""
+    result = ""
 
     game = GameActive.objects.filter(gameuser_id1=game_user)
     if len(game) == 1:
-        if action == "path":
-            path = f'game{game[0].game_name[-1]}player1'
+        result = f'game{game[0].game_name[-1]}player1'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'score' : game[0].score1,
+                'damage' : game[0].damage1
+            }
         elif action == "clear":
             game[0].gameuser_id1 = None
             game[0].save()
 
     game = GameActive.objects.filter(gameuser_id2=game_user)
     if len(game) == 1:
-        if action == "path":
-            path = f'game{game[0].game_name[-1]}player2'
+        result = f'game{game[0].game_name[-1]}player2'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'score' : game[0].score2,
+                'damage' : game[0].damage2
+            }
         elif action == "clear":
             game[0].gameuser_id2 = None
             game[0].save()
 
     game = GameActive.objects.filter(gameuser_id3=game_user)
     if len(game) == 1:
-        if action == "path":
-            path = f'game{game[0].game_name[-1]}player3'
+        result = f'game{game[0].game_name[-1]}player3'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'score' : game[0].score3,
+                'damage' : game[0].damage3
+            }
         elif action == "clear":
             game[0].gameuser_id3 = None
             game[0].save()
 
     game = GameActive.objects.filter(gameuser_id4=game_user)
     if len(game) == 1:
-        if action == "path":
-            path = f'game{game[0].game_name[-1]}player4'
+        result = f'game{game[0].game_name[-1]}player4'
+        if action == "dict":
+            result = {
+                'path' : result,
+                'score' : game[0].score4,
+                'damage' : game[0].damage4
+            }
         elif action == "clear":
             game[0].gameuser_id4 = None
             game[0].save()
 
-    return path
+    return result
 
 def game_player_select(request):
     result = "nope!"
