@@ -34,7 +34,7 @@ class GameMetricsConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         n = text_data_json['n']
-        if n.startswith('chat') or n.startswith('metrics') or n.startswith('status'):
+        if n.startswith('chat') or n.startswith('metrics') or n.startswith('status') or n.startswith('io'):
             await self.channel_layer.group_send(
                 self.group_name, {'type': 'message', 'message': text_data})
 
@@ -70,7 +70,7 @@ class GameCommonConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         n = text_data_json['n']
         
-        if n.startswith('chat') or n.startswith('ball') or n.startswith('tank'):
+        if n.startswith('chat') or n.startswith('ball') or n.startswith('tank') or n.startswith('io'):
             await self.channel_layer.group_send(
                 self.group_name, {'type': 'message', 'message': text_data})
 
@@ -105,7 +105,7 @@ class GamePlayerConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         n = text_data_json['n']
-        if n.startswith('chat') or n.startswith('ball') or n.startswith('tank'):
+        if n.startswith('chat') or n.startswith('ball') or n.startswith('tank') or n.startswith('io'):
             await self.channel_layer.group_send(
                 self.group_name, {'type': 'message', 'message': text_data})
 

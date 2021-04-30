@@ -1,8 +1,15 @@
 var html_ready = false;
 var gamefield_ready = false;
+var gameplay_ready = false;
 var player_ready = false;
 var tank_controls = true;
 var chat_target = 5;
+
+var gameplayersfield_ready = [];
+var gameplayers_begin = [];
+var gameplayers_end = [];
+var gamebegin_countdown = 0;
+var gameend_countdown = 0;
 
 var live_player = "";
 var live_player_number = "0";
@@ -537,6 +544,77 @@ function BallSender(ball) {
     gamecommonsend(ball);
 }
 
+
+// gameplayersfield_ready
+// gameplayers_begin
+// gameplayers_end
+
+
+// gameplayers_begin.push(dict.p)
+// gamebegin_countdown = Number(dict.s)
+// gameend_countdown = Number(dict.t)
+
+function gameplayEvents() {
+    if (html_ready && gamefield_ready) {
+
+        if (gameend_countdown > 0) {
+            gameplay_ready = true;
+            if (gamebegin_countdown > 0) {
+                if (loopcycleCheck(40)) {
+                    document.getElementById("game-count-down").innerHTML = "Battle begins in: " + gamebegin_countdown + " Seconds"
+                    gamebegin_countdown--;
+                    if (gamebegin_countdown == 0) {
+                        player_ready = true;
+                    }
+                }
+            } else {
+                document.getElementById("game-count-down").innerHTML = ""
+                if (loopcycleCheck(40)) {
+                    gameend_countdown--;
+                    if (gameend_countdown == 0 || gameplayers_end.length > 2) {
+                        console.log("Yep, it's over!!");
+
+                        for (i=1; i<5; i++) {
+                            if (!gameplayers_end.includes(i)) {
+                                winner = i;
+                                document.getElementById("game-count-down").innerHTML = "The Last Tank remaining is: " + i;
+                                break
+                            }
+                        }
+
+                        player_ready = false;
+                    }
+                }
+            }
+        }
+
+        if (!gameplay_ready) {
+            if (gameplayersfield_ready.length < 3) {
+                if (loopcycleCheck(10)) {
+                    send_field = {
+                        k : 'field',
+                        n : 'io',
+                        p : live_player_number
+                    }
+                    gamecommonsend(send_field);
+                }
+            } else {
+                if (loopcycleCheck(10)) {
+                    if (live_player_number == 1) {
+                        send_begin = {
+                            k : 'begin',
+                            n : 'io',
+                            s : 10,
+                            l : 300
+                        }
+                        gamecommonsend(send_begin);
+                    }
+                }
+            }
+        }
+    }
+}
+
 function gamefieldRequest() {
     if (!gamefield_ready) {
         if (loopcycleCheck(100)) {
@@ -626,10 +704,6 @@ function uploadgameuserStats() {
     if (loopcycleCheck(600)) {
         if (html_ready) {
             if (live_tank != {}) {
-                if (live_tank.d >= 10000) {
-                    gameuser_status = "0";
-                    player_ready = false;
-                }
                 player_stats = {
                     z : gameuser_status,
                     g : live_player_game,
@@ -661,6 +735,22 @@ function gameLoop(){
     if (html_ready) {
         loop_cycles++;
         document.querySelector('#cycles').value = (loop_cycles);
+
+        if (live_tank.d >= 10000) {
+
+            gameuser_status = "1";
+            player_ready = false;
+            if (loopcycleCheck(120)) {
+                send_end = {
+                    k : 'end',
+                    n : 'io',
+                    p : live_player_number
+                }
+                gamecommonsend(send_end);
+            }
+        }
+
+        gameplayEvents();
 
         changeConsole();
         gamefieldRequest();
@@ -786,11 +876,22 @@ document.onkeyup = function(e){
             if (e.key == 'F4') {chat_target='4'}
             if (e.key == 'F5') {chat_target='5'}
             if (e.key == 'F6') {chat_target='6'}
+            if (e.key == 'F7') {chat_target='7'}
+
             if (e.key == 'Enter') {
                 if (chat_target < 6) {
-                    gamecommonsend({'k':'chat','n':'chat'+ chat_target ,'m': all_text })
-                } else {
-                    gamemetricssend({'k':'chat','n':'chat'+ chat_target ,'m': all_text })
+                    gamecommonsend({'k':'chat','n':'chat'+ chat_target ,'m': all_text, 's':live_player_number})
+                }
+                if (chat_target == 6) {
+                    gamemetricssend({'k':'chat','n':'chat'+ chat_target ,'m': all_text, 's':live_player_number})
+                }
+                if (chat_target == 7) {
+                    live_player_name = all_text
+                    if (live_player_number ==1) {player1_name = all_text}
+                    if (live_player_number ==2) {player1_name = all_text}
+                    if (live_player_number ==3) {player1_name = all_text}
+                    if (live_player_number ==4) {player1_name = all_text}
+                    document.getElementById("live-name").innerHTML = live_player_name
                 }
                 document.querySelector('#chat-input').value = "";
             }
@@ -881,7 +982,6 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
@@ -907,7 +1007,6 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
@@ -933,7 +1032,6 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
@@ -950,22 +1048,44 @@ window.addEventListener("load", function() {
         const data = JSON.parse(e.data);
         const dict = JSON.parse(data);
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
         if (dict.k == 'chat') {
             chat_number = dict.n.charAt(dict.n.length - 1);
-            if (live_player_number == chat_number || chat_number == 5) {
+            if (dict.s == "1") {sender = player1_name}
+            if (dict.s == "2") {sender = player2_name}
+            if (dict.s == "3") {sender = player3_name}
+            if (dict.s == "4") {sender = player4_name}
+            if (live_player_number == chat_number) {
+                curr_text = document.querySelector('#game-player-log').value
+                document.querySelector('#game-player-log').value = sender + ' says: ' + (dict.m) + '\n' + curr_text
+            }
+            if (chat_number == 5) {
                 curr_text = document.querySelector('#game-common-log').value
-                document.querySelector('#game-common-log').value = (dict.m) + '\n' + curr_text
-            } 
+                document.querySelector('#game-common-log').value = sender + ' says: ' + (dict.m) + '\n' + curr_text
+            }
         }
-    };
+        if (dict.k == 'field') {
+            if (!gameplayersfield_ready.includes(dict.p)) {gameplayersfield_ready.push(dict.p)}
+        }
+        if (dict.k == 'begin') {
+            if (!gameplayers_begin.includes(dict.p)) {
+                gameplayers_begin.push(dict.p);
+                gamebegin_countdown = Number(dict.s);
+                gameend_countdown = Number(dict.l);
+            }
+        }
+        if (dict.k == 'end') {
+            if (!gameplayers_end.includes(dict.p)) {
+                gameplayers_end.push(dict.p);
+            }
+        }
+    }
 
     gamecommonSocket.onclose = function(e) {
         console.error('game common socket closed unexpectedly');
-    };
+    }
 
     gamemetrics = document.getElementById('game-metrics').textContent;
     gamemetricsSocket = new WebSocket('ws://' + window.location.host + '/ws/gm/' + gamemetrics + '/');
@@ -989,7 +1109,6 @@ window.addEventListener("load", function() {
     tank2_recv = 0;
     tank3_recv = 0;
     tank4_recv = 0;
-    player_ready = true;
     html_ready = true;
 });
 

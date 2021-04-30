@@ -12,8 +12,8 @@
     </head>
     <body id="body">
         <p id="csrf-token" hidden>{% csrf_token %}</p>
+        <p id="user-id" hidden>{{gameuser.id}}</p>
         <p id="live-player" hidden>{{live_player}}</p>
-        <p id="live-name" hidden>{{live_name}}</p>
         <p id="live-score" hidden>{{live_score}}</p>
         <p id="live-damage" hidden>{{live_damage}}</p>
         <p id="game-common" hidden>{{game_common}}</p>
@@ -67,6 +67,11 @@
                 </div>
             </div>
         </div>
+        <div id="game-message-overlay" class="container-fluid countdown">
+            <div class="col-12 text-center">
+                <h1 id="game-count-down" class="display-1 bg-dark text-white"></h1>
+            </div>
+        </div>
         <div id="console" class="container-fluid metrics bg-gray">
             <div class="row center">
                 <div class="col-12 text-center mt-1">
@@ -84,21 +89,26 @@
                 <div class="col-12 text-center"><p>Controls are: Turret - left:[F] Right:[J] Fire:[G] Stop: [H] --- Steering: left:[D] right: [K] --- Drive - forward; [S] backward: [L] --- Drive-Steer Stop: [A] --- Controls Toggle: [Semicolon]</p></div>
             </div>
             <div class="row center">
-                <div class="col-4 my-auto">
-                    <p id="user-id" hidden>{{gameuser.id}}</p>
-                    <p id="user-screen-name" hidden>{{gameuser.screen_name}}</p>
-                    <h2>{{gameuser.screen_name}}</h2>
+                <div class="col-2 text-right">
+                    <h3>Player Name:</h3>
+                </div>
+                <div class="col-2 text-left">
+                    <h3 id="live-name">{{live_name}}</h3>
                 </div>
                 <div class="col-4 text-center"><textarea id="chat-input" cols="40" rows="1"></textarea></div>
                 <div class="col-4 text-center" ><textarea id="cycles" cols="10" rows="1"></textarea></div>
             </div>
             <div class="row center">
-                <div class="col-2 text-center"><textarea id="game-player1-chat-log" cols="20" rows="2"></textarea></div>
-                <div class="col-2 text-center"><textarea id="game-player2-chat-log" cols="20" rows="2"></textarea></div>
-                <div class="col-2 text-center"><textarea id="game-player3-chat-log" cols="20" rows="2"></textarea></div>
-                <div class="col-2 text-center"><textarea id="game-player4-chat-log" cols="20" rows="2"></textarea></div>
-                <div class="col-2 text-center"><textarea id="game-common-log" cols="20" rows="2"></textarea></div>
-                <div class="col-2 text-center"><textarea id="game-metrics-log" cols="20" rows="2"></textarea></div>
+                <div class="col-6 text-center"><textarea id="game-player-log" cols="60" rows="4"></textarea></div>
+                <div class="col-6 text-center"><textarea id="game-common-log" cols="60" rows="4"></textarea></div>
+            </div>
+
+            <div class="row center">
+                <div class="col-2 text-center"><textarea id="game-player1-chat-log" cols="20" rows="1"></textarea></div>
+                <div class="col-2 text-center"><textarea id="game-player2-chat-log" cols="20" rows="1"></textarea></div>
+                <div class="col-2 text-center"><textarea id="game-player3-chat-log" cols="20" rows="1"></textarea></div>
+                <div class="col-2 text-center"><textarea id="game-player4-chat-log" cols="20" rows="1"></textarea></div>
+                <div class="col-4 text-center"><textarea id="game-matrics-log" cols="40" rows="1"></textarea></div>
             </div>
         </div>
     </body>
