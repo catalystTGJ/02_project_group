@@ -1,39 +1,53 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset='utf-8'>
-        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-        <title>rank</title>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'css/game_rank.css' %}?{% now 'U' %}">
-        <script src="{% static 'js/game_rank.js' %}"></script>
-    </head>
-    <body>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>rank</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+    <script src="{% static 'js/game_rank.js' %}"></script>
+</head>
 
-        <div class="container py-3 justify-content-center">
-            <div class="row">
-                <div class="col-4 my-auto">
-                    <h2>Metrics</h2>
-                </div>
-                <div class="col-8 my-auto text-right">
-                    <a class="btn btn-light btn-sm" href="/game-pick">Select</a>
-                    <a class="btn btn-light btn-sm" href="/game-dash">Dash</a>
-                    <a class="btn btn-dark btn-sm" href="/game-rank">Metrics</a>
-                    <a class="btn btn-warning btn-sm" href="/signout">Sign-out</a>
-                </div>
+<body>
+
+    <div class="container py-3 justify-content-center">
+        <div class="row">
+            <div class="col-4 my-auto">
+                <h2>Metrics</h2>
             </div>
-
-            <hr>
-
-        </div>
-
-        <div id="game-message-overlay" class="container-fluid countdown">
-            <div class="col-12 text-center">
-                <h1 id="game-count-down" class="display-3 bg-dark text-white">:: UNDER CONSTRUCTION ::</h1>
+            <div class="col-8 my-auto text-right">
+                <a class="btn btn-light btn-sm" href="/game-pick">Select</a>
+                <a class="btn btn-light btn-sm" href="/game-dash">Dash</a>
+                <a class="btn btn-dark btn-sm" href="/game-rank">Metrics</a>
+                <a class="btn btn-warning btn-sm" href="/signout">Sign-out</a>
             </div>
         </div>
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Player</th>
+                    <th scope="col">High score</th>
+                    <th scope="col">Wins</th>
+                    <th scope="col">Losses</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">{{ gameuse.screen_name }} Screen name</th>
+                    <td>{{ gameuser.high_score }} High score</td>
+                    <td>{{ gameuser.games_won }} Games won</td>
+                    <td>{{ gameuser.games_lost }} Games lost</td>
+                </tr>
+            </tbody>
+        </table>
 
-    </body>
+        <hr>
+
+    </div>
+
+</body>
 </html>
