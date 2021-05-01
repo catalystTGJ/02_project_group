@@ -568,21 +568,22 @@ function gameplayEvents() {
                     }
                 }
             } else {
-                document.getElementById("game-count-down").innerHTML = ""
                 if (loopcycleCheck(40)) {
                     gameend_countdown--;
                     if (gameend_countdown == 0 || gameplayers_end.length > 2) {
-                        console.log("Yep, it's over!!");
-
-                        for (i=1; i<5; i++) {
-                            if (!gameplayers_end.includes(i)) {
-                                winner = i;
-                                document.getElementById("game-count-down").innerHTML = "The Last Tank remaining is: " + i;
-                                break
+                        if (gameplayers_end.length > 2) {
+                            for (i=1; i<5; i++) {
+                                if (!gameplayers_end.includes(i)) {
+                                    var winner = i;
+                                    document.getElementById("game-count-down").innerHTML = "The Last Tank remaining is: " + i; 
+                                }
                             }
+                        } else { 
+                            document.getElementById("game-count-down").innerHTML = "The Battle has ended, with no clear victor!";
                         }
-
                         player_ready = false;
+                    } else {
+                        document.getElementById("game-count-down").innerHTML = ""
                     }
                 }
             }
@@ -632,6 +633,36 @@ function gamefieldRequest() {
                     gamefield_ready = true;
                 }
             };
+        }
+    }
+}
+
+function gamesplayersCheck() {
+    if (html_ready) {
+        if (loopcycleCheck(200)) {
+
+            var url = 'http://' + window.location.host + '/games-players-request';
+            const gamesplayersRequest = new XMLHttpRequest();
+            gamesplayersRequest.open("GET", url, true);
+            gamesplayersRequest.send();
+
+            gamesplayersRequest.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    const data_list = JSON.parse(this.responseText);
+                    for (var i=0; i<4; i++) {
+                        var selected_players = 0;
+                        for (var player=1; player<5; player++) {
+                            if (i+1==live_player_game) {
+                                console.log(data_list[i][player])
+                                if (player == 1) {player1_name = data_list[i][player]}
+                                if (player == 2) {player2_name = data_list[i][player]}
+                                if (player == 3) {player3_name = data_list[i][player]}
+                                if (player == 4) {player4_name = data_list[i][player]}
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -735,9 +766,7 @@ function gameLoop(){
     if (html_ready) {
         loop_cycles++;
         document.querySelector('#cycles').value = (loop_cycles);
-
         if (live_tank.d >= 10000) {
-
             gameuser_status = "1";
             player_ready = false;
             if (loopcycleCheck(120)) {
@@ -749,9 +778,8 @@ function gameLoop(){
                 gamecommonsend(send_end);
             }
         }
-
         gameplayEvents();
-
+        gamesplayersCheck();
         changeConsole();
         gamefieldRequest();
         if (loopcycleCheck(50)) {
