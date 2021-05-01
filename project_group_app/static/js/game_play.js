@@ -1,8 +1,15 @@
 var html_ready = false;
 var gamefield_ready = false;
+var gameplay_ready = false;
 var player_ready = false;
 var tank_controls = true;
 var chat_target = 5;
+
+var gameplayersfield_ready = [];
+var gameplayers_begin = [];
+var gameplayers_end = [];
+var gamebegin_countdown = 0;
+var gameend_countdown = 0;
 
 var live_player = "";
 var live_player_number = "0";
@@ -90,7 +97,7 @@ var tank = {
 //r_c is the rotation amount for chassis
 //r_t is the rotation amount for turret
 //s is the speed for chassis
-//runrise is a dictionary of x,y cooridinate values for run/rise
+//rr is a dictionary of x,y cooridinate values for run/rise
 
 var tank1 = {
     k : 'tank',
@@ -106,7 +113,7 @@ var tank1 = {
     r_c : 0,
     r_t : 0,
     s : 0,
-    runrise : {'x' : 0, 'y' : 0}
+    rr : {'x' : 0, 'y' : 0}
 }
 
 var tank2 = {
@@ -123,7 +130,7 @@ var tank2 = {
     r_c: 0,
     r_t: 0,
     s: 0,
-    runrise: {'x' : 0, 'y' : 0}
+    rr: {'x' : 0, 'y' : 0}
 }
 
 var tank3 = {
@@ -140,7 +147,7 @@ var tank3 = {
     r_c: 0,
     r_t: 0,
     s: 0,
-    runrise: {'x' : 0, 'y' : 0}
+    rr: {'x' : 0, 'y' : 0}
 }
 
 var tank4 = {
@@ -157,7 +164,7 @@ var tank4 = {
     r_c: 0,
     r_t: 0,
     s: 0,
-    runrise: {'x' : 0, 'y' : 0}
+    rr: {'x' : 0, 'y' : 0}
 }
 
 function sound(src) {
@@ -313,13 +320,13 @@ function updateTank(tank_dict, local) {
         }
 
         //calculate run rise, as it must exist in order for initial motion
-        tank_dict.runrise = degreestoRunRise(tank_dict.t_c);
+        tank_dict.rr = degreestoRunRise(tank_dict.t_c);
 
         // when chassis drive occurs
         if (tank_dict.s != 0) {
             tank_dict.e = true;
-            var new_x = tank_dict.x + tank_dict.s * tank_dict.runrise.x;
-            var new_y = tank_dict.y + tank_dict.s * tank_dict.runrise.y;
+            var new_x = tank_dict.x + tank_dict.s * tank_dict.rr.x;
+            var new_y = tank_dict.y + tank_dict.s * tank_dict.rr.y;
             var adj_x = new_x + tank.x_center;
             var adj_y = new_y + tank.y_center;
 
@@ -349,8 +356,8 @@ function updateTank(tank_dict, local) {
             if (collisions == 0) {
                 if (tot_r > 100) {tot_r=100}
                 if (tot_r > 0) {
-                    var new_x = tank_dict.x + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.runrise.x);    
-                    var new_y = tank_dict.y + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.runrise.y);
+                    var new_x = tank_dict.x + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.rr.x);    
+                    var new_y = tank_dict.y + ((tank_dict.s - (tank_dict.s/100)*tot_r) * tank_dict.rr.y);
                     var adj_x = new_x + tank.x_center;
                     var adj_y = new_y + tank.y_center;
                 } else {
@@ -422,9 +429,9 @@ function ballisticsRender() {
     for (i=0; i<old_list.length; i++) {
         if (old_list[i].c > 0) {
             old_list[i].c-=2;
-            old_list[i].runrise = degreestoRunRise(old_list[i].t);
-            old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].runrise.x;
-            old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].runrise.y;
+            old_list[i].rr = degreestoRunRise(old_list[i].t);
+            old_list[i].x = old_list[i].x + old_list[i].s * old_list[i].rr.x;
+            old_list[i].y = old_list[i].y + old_list[i].s * old_list[i].rr.y;
             if (!existsElement(old_list[i].n)) {
                 if (createElement(old_list[i].n + '-container', 'ballistic-overlay', 'div')) {
                     (createElement(old_list[i].n, old_list[i].n + '-container', 'img'))
@@ -537,6 +544,78 @@ function BallSender(ball) {
     gamecommonsend(ball);
 }
 
+
+// gameplayersfield_ready
+// gameplayers_begin
+// gameplayers_end
+
+
+// gameplayers_begin.push(dict.p)
+// gamebegin_countdown = Number(dict.s)
+// gameend_countdown = Number(dict.t)
+
+function gameplayEvents() {
+    if (html_ready && gamefield_ready) {
+
+        if (gameend_countdown > 0) {
+            gameplay_ready = true;
+            if (gamebegin_countdown > 0) {
+                if (loopcycleCheck(40)) {
+                    document.getElementById("game-count-down").innerHTML = "Battle begins in: " + gamebegin_countdown + " Seconds"
+                    gamebegin_countdown--;
+                    if (gamebegin_countdown == 0) {
+                        player_ready = true;
+                    }
+                }
+            } else {
+                if (loopcycleCheck(40)) {
+                    gameend_countdown--;
+                    if (gameend_countdown == 0 || gameplayers_end.length > 2) {
+                        if (gameplayers_end.length > 2) {
+                            for (i=1; i<5; i++) {
+                                if (!gameplayers_end.includes(i)) {
+                                    var winner = i;
+                                    document.getElementById("game-count-down").innerHTML = "The Last Tank remaining is: " + i; 
+                                }
+                            }
+                        } else { 
+                            document.getElementById("game-count-down").innerHTML = "The Battle has ended, with no clear victor!";
+                        }
+                        player_ready = false;
+                    } else {
+                        document.getElementById("game-count-down").innerHTML = ""
+                    }
+                }
+            }
+        }
+
+        if (!gameplay_ready) {
+            if (gameplayersfield_ready.length < 3) {
+                if (loopcycleCheck(10)) {
+                    send_field = {
+                        k : 'field',
+                        n : 'io',
+                        p : live_player_number
+                    }
+                    gamecommonsend(send_field);
+                }
+            } else {
+                if (loopcycleCheck(10)) {
+                    if (live_player_number == 1) {
+                        send_begin = {
+                            k : 'begin',
+                            n : 'io',
+                            s : 10,
+                            l : 300
+                        }
+                        gamecommonsend(send_begin);
+                    }
+                }
+            }
+        }
+    }
+}
+
 function gamefieldRequest() {
     if (!gamefield_ready) {
         if (loopcycleCheck(100)) {
@@ -554,6 +633,36 @@ function gamefieldRequest() {
                     gamefield_ready = true;
                 }
             };
+        }
+    }
+}
+
+function gamesplayersCheck() {
+    if (html_ready) {
+        if (loopcycleCheck(200)) {
+
+            var url = 'http://' + window.location.host + '/games-players-request';
+            const gamesplayersRequest = new XMLHttpRequest();
+            gamesplayersRequest.open("GET", url, true);
+            gamesplayersRequest.send();
+
+            gamesplayersRequest.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    const data_list = JSON.parse(this.responseText);
+                    for (var i=0; i<4; i++) {
+                        var selected_players = 0;
+                        for (var player=1; player<5; player++) {
+                            if (i+1==live_player_game) {
+                                console.log(data_list[i][player])
+                                if (player == 1) {player1_name = data_list[i][player]}
+                                if (player == 2) {player2_name = data_list[i][player]}
+                                if (player == 3) {player3_name = data_list[i][player]}
+                                if (player == 4) {player4_name = data_list[i][player]}
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -626,14 +735,11 @@ function uploadgameuserStats() {
     if (loopcycleCheck(600)) {
         if (html_ready) {
             if (live_tank != {}) {
-                if (live_tank.d >= 10000) {
-                    gameuser_status = "0";
-                    player_ready = false;
-                }
                 player_stats = {
                     z : gameuser_status,
                     g : live_player_game,
                     p : live_player_number,
+                    n : live_player_name,
                     s : gameuser_score,
                     d : live_tank.d,
                 }
@@ -645,6 +751,7 @@ function uploadgameuserStats() {
                 }
                 gameuserstatsPost.open("POST", "/game-player-update", true);
                 gameuserstatsPost.setRequestHeader('X-CSRFToken', csrf_token);
+                // console.log(JSON.stringify(player_stats))
                 gameuserstatsPost.send(JSON.stringify(player_stats));
             }
         }
@@ -659,7 +766,20 @@ function gameLoop(){
     if (html_ready) {
         loop_cycles++;
         document.querySelector('#cycles').value = (loop_cycles);
-
+        if (live_tank.d >= 10000) {
+            gameuser_status = "1";
+            player_ready = false;
+            if (loopcycleCheck(120)) {
+                send_end = {
+                    k : 'end',
+                    n : 'io',
+                    p : live_player_number
+                }
+                gamecommonsend(send_end);
+            }
+        }
+        gameplayEvents();
+        gamesplayersCheck();
         changeConsole();
         gamefieldRequest();
         if (loopcycleCheck(50)) {
@@ -691,10 +811,10 @@ document.onkeydown = function(e){
                         o : gameuser_id
                     }
 
-                    new_ball.runrise = degreestoRunRise(new_ball.t)
-                    adjust = ((Math.abs(new_ball.runrise.x) + Math.abs(new_ball.runrise.y) > 1.7) ? .72 : 1);
-                    new_ball.x = (live_tank.x + tank.x_center) + (new_ball.runrise.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
-                    new_ball.y = (live_tank.y + tank.y_center) + (new_ball.runrise.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
+                    new_ball.rr = degreestoRunRise(new_ball.t)
+                    adjust = ((Math.abs(new_ball.rr.x) + Math.abs(new_ball.rr.y) > 1.7) ? .72 : 1);
+                    new_ball.x = (live_tank.x + tank.x_center) + (new_ball.rr.x * adjust * ((tank.w_turret * tank.to_turret / 100)))
+                    new_ball.y = (live_tank.y + tank.y_center) + (new_ball.rr.y * adjust * ((tank.w_turret * tank.to_turret / 100)))
 
                     BallSender(new_ball);
                     live_tank.h+=330;
@@ -784,11 +904,22 @@ document.onkeyup = function(e){
             if (e.key == 'F4') {chat_target='4'}
             if (e.key == 'F5') {chat_target='5'}
             if (e.key == 'F6') {chat_target='6'}
+            if (e.key == 'F7') {chat_target='7'}
+
             if (e.key == 'Enter') {
                 if (chat_target < 6) {
-                    gamecommonsend({'k':'chat','n':'chat'+ chat_target ,'m': all_text })
-                } else {
-                    gamemetricssend({'k':'chat','n':'chat'+ chat_target ,'m': all_text })
+                    gamecommonsend({'k':'chat','n':'chat'+ chat_target ,'m': all_text, 's':live_player_number})
+                }
+                if (chat_target == 6) {
+                    gamemetricssend({'k':'chat','n':'chat'+ chat_target ,'m': all_text, 's':live_player_number})
+                }
+                if (chat_target == 7) {
+                    live_player_name = all_text
+                    if (live_player_number ==1) {player1_name = all_text}
+                    if (live_player_number ==2) {player1_name = all_text}
+                    if (live_player_number ==3) {player1_name = all_text}
+                    if (live_player_number ==4) {player1_name = all_text}
+                    document.getElementById("live-name").innerHTML = live_player_name
                 }
                 document.querySelector('#chat-input').value = "";
             }
@@ -806,8 +937,8 @@ window.addEventListener("load", function() {
     gameuser_id = Number(document.getElementById("user-id").innerHTML);
     gameuser_score = Number(document.getElementById("live-score").innerHTML);
     gameuser_damage = Number(document.getElementById("live-damage").innerHTML);
-    screen_name = document.getElementById("user-screen-name").innerHTML;
     live_player = document.getElementById('live-player').innerHTML;
+    live_player_name = document.getElementById("live-name").innerHTML;
     live_player_number = live_player.charAt(live_player.length - 1);
     live_player_game = live_player.charAt(4);
     player1_name = document.getElementById("game-player1-name").innerHTML;
@@ -879,7 +1010,6 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
@@ -905,7 +1035,6 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
@@ -931,7 +1060,6 @@ window.addEventListener("load", function() {
             }
         }
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
@@ -948,22 +1076,44 @@ window.addEventListener("load", function() {
         const data = JSON.parse(e.data);
         const dict = JSON.parse(data);
         if (dict.k == 'ball') {
-            
             canon_sound.play();
             ball_list.push(dict);
         }
         if (dict.k == 'chat') {
             chat_number = dict.n.charAt(dict.n.length - 1);
-            if (live_player_number == chat_number || chat_number == 5) {
+            if (dict.s == "1") {sender = player1_name}
+            if (dict.s == "2") {sender = player2_name}
+            if (dict.s == "3") {sender = player3_name}
+            if (dict.s == "4") {sender = player4_name}
+            if (live_player_number == chat_number) {
+                curr_text = document.querySelector('#game-player-log').value
+                document.querySelector('#game-player-log').value = sender + ' says: ' + (dict.m) + '\n' + curr_text
+            }
+            if (chat_number == 5) {
                 curr_text = document.querySelector('#game-common-log').value
-                document.querySelector('#game-common-log').value = (dict.m) + '\n' + curr_text
-            } 
+                document.querySelector('#game-common-log').value = sender + ' says: ' + (dict.m) + '\n' + curr_text
+            }
         }
-    };
+        if (dict.k == 'field') {
+            if (!gameplayersfield_ready.includes(dict.p)) {gameplayersfield_ready.push(dict.p)}
+        }
+        if (dict.k == 'begin') {
+            if (!gameplayers_begin.includes(dict.p)) {
+                gameplayers_begin.push(dict.p);
+                gamebegin_countdown = Number(dict.s);
+                gameend_countdown = Number(dict.l);
+            }
+        }
+        if (dict.k == 'end') {
+            if (!gameplayers_end.includes(dict.p)) {
+                gameplayers_end.push(dict.p);
+            }
+        }
+    }
 
     gamecommonSocket.onclose = function(e) {
         console.error('game common socket closed unexpectedly');
-    };
+    }
 
     gamemetrics = document.getElementById('game-metrics').textContent;
     gamemetricsSocket = new WebSocket('ws://' + window.location.host + '/ws/gm/' + gamemetrics + '/');
@@ -987,7 +1137,6 @@ window.addEventListener("load", function() {
     tank2_recv = 0;
     tank3_recv = 0;
     tank4_recv = 0;
-    player_ready = true;
     html_ready = true;
 });
 
