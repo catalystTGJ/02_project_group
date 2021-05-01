@@ -28,12 +28,10 @@ def signin(request):
 # sign-off buttion will flush session
 # it might be desirable to write some stuff for the user into the db, but i'm not sure we need this.
 def signout(request):
-
     user_id = request.session['_auth_user_id']
     user = User.objects.get(id=user_id)
     gameuser = GameUser.objects.get(user=user)
     gameplayerPath(gameuser, action="clear")
-
     request.session.flush()
     return redirect('/')
 
