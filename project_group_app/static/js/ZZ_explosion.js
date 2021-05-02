@@ -11,22 +11,22 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 function Particle(x, y, dx, dy, radius, color) {
-  this.x = x;
-  this.y = y;
-  this.dx = dx;
-  this.dy = -dy;
-  this.radius = 5;
-  this.color = color;
-  this.timeToLive = 1;
-  // this.mass = 0.2;
+    this.x = x;
+    this.y = y;
+    this.dx = dx;
+    this.dy = -dy;
+    this.radius = 5;
+    this.color = color;
+    this.timeToLive = 1;
+    // this.mass = 0.2;
 
-  this.update = function() {
+    this.update = function() {
     if (this.y + this.radius + this.dy > canvas.height) {
-      this.dy = -this.dy;
+    this.dy = -this.dy;
     }
 
     if (this.x + this.radius + this.dx > canvas.width || this.x - this.radius + this.dx < 0) {
-      this.dx = -this.dx;
+    this.dx = -this.dx;
     }
     // this.dy += gravity * this.mass;
     this.x += this.dx;
@@ -34,40 +34,40 @@ function Particle(x, y, dx, dy, radius, color) {
     this.draw();
 
     this.timeToLive -= 0.01;
-  };
+    };
 
-  this.draw = function() {
-    c.save();
-    c.beginPath();
-    c.arc(this.x, this.y, 2, 0, Math.PI * 2, false);
-    c.shadowColor = this.color;
-    c.shadowBlur = 10;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 0;
-    c.fillStyle = this.color;
-    c.fill();
+    this.draw = function() {
+        c.save();
+        c.beginPath();
+        c.arc(this.x, this.y, 2, 0, Math.PI * 2, false);
+        c.shadowColor = this.color;
+        c.shadowBlur = 10;
+        c.shadowOffsetX = 0;
+        c.shadowOffsetY = 0;
+        c.fillStyle = this.color;
+        c.fill();
 
-    c.closePath();
+        c.closePath();
 
-    c.restore();
-  };
+        c.restore();
+    };
 }
 
 function Explosion(x, y, ) {
-  this.particles = [];  
-  this.rings = [];
-  this.source = cannonball;
+    this.particles = [];  
+    this.rings = [];
+    this.source = cannonball;
 
-  this.init = function() {
+    this.init = function() {
     for (var i = 0; i < 10; i++) {
 
-      var dx = (Math.random() * 6) - 3;
-      var dy = (Math.random() * 6) - 3;
+        var dx = (Math.random() * 6) - 3;
+        var dy = (Math.random() * 6) - 3;
 
-      // var hue = (255 / 5) * i;
-      // var color = "hsl(" + hue + ", 100%, 50%)";
-      var randomColorIndex = Math.floor(Math.random() * colors.length);
-      var randomParticleColor = colors[randomColorIndex];
+        // var hue = (255 / 5) * i;
+        // var color = "hsl(" + hue + ", 100%, 50%)";
+        var randomColorIndex = Math.floor(Math.random() * colors.length);
+        var randomParticleColor = colors[randomColorIndex];
 
 
         this.particles.push(new Particle(x, y, dx, dy, 1, randomParticleColor));
@@ -75,7 +75,7 @@ function Explosion(x, y, ) {
 
     // Create ring once explosion is instantiated
       // this.rings.push(new Ring(this.source, "blue"));
-  };
+};
 
     this.init();
 
