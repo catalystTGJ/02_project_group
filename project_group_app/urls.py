@@ -18,4 +18,5 @@ urlpatterns = [
     path('game-field-request/<int:game_number>', views.game_field_request),
     path('testpost', views.testpost),
     path('utility', views.utility),
+    path('explosion', views.explosion),
 ]
