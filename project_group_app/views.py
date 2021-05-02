@@ -249,3 +249,8 @@ def testpost(request):
         stuff = json.load(request)
         print(stuff['game_number'])
         return HttpResponse("done")
+
+
+@login_required(login_url='/signin')
+def explosion(request):
+    return render(request, "ZZ_explosion.html")

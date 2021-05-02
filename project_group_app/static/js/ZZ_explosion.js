@@ -146,7 +146,7 @@ function animate() {
 
 explosions.push(new Explosion(500, 500)
 
-animate();
+// animate();
 
 
 
